@@ -1,1 +1,119 @@
 @import "tailwindcss";
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apply animations to elements */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideInUp 0.3s ease-out;
+}
+
+/* Input focus styles */
+input:focus,
+select:focus,
+textarea:focus {
+  @apply outline-none;
+  border-color: rgb(6 182 212 / 1);
+  box-shadow: 0 0 0 3px rgb(6 182 212 / 0.1);
+}
+
+/* Smooth transitions for all interactive elements */
+button,
+a,
+input,
+select,
+textarea {
+  @apply transition-all duration-200;
+}
+
+/* Disabled states */
+button:disabled,
+input:disabled,
+select:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-400 rounded-lg hover:bg-slate-500;
+}
+
+/* Selection color */
+::selection {
+  background-color: rgb(6 182 212 / 0.2);
+  color: rgb(15 23 42 / 1);
+}
+
+/* Form inputs with better styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+  @apply bg-white border-2 border-slate-200 rounded-lg px-4 py-3 text-slate-900 placeholder-slate-400;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  @apply cursor-pointer;
+}
+
+/* Overlay for drawers */
+.fixed.inset-0 {
+  @apply z-50;
+}
+
+/* Animations for cards */
+.group:hover {
+  @apply transition-all duration-300;
+}

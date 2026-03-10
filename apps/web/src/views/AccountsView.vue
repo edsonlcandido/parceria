@@ -1,29 +1,71 @@
 <template>
-  <div class="min-h-screen bg-[#e9edf4] pb-20">
-    <main class="mx-auto max-w-md px-3 py-4">
-      <header class="mb-5 flex items-center justify-between rounded-3xl bg-white px-4 py-4 shadow-sm">
-        <div>
-          <h1 class="text-3xl font-bold text-slate-900">Contas</h1>
-          <p class="text-sm text-slate-500">Gerencie contas e cartões</p>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-primary-50/30 pb-24">
+    <main class="mx-auto max-w-2xl px-4 py-6">
+      <!-- Header -->
+      <div class="mb-10">
+        <div class="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+          <div>
+            <h1 class="text-4xl font-bold text-slate-900">Contas e Cartões</h1>
+            <p class="mt-2 text-slate-600">Gerencie suas contas e cartões</p>
+          </div>
+          <button 
+            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:from-primary-700 hover:to-primary-800 active:scale-95 whitespace-nowrap"
+            @click="openCreate"
+          >
+            <span class="text-lg">+</span>
+            <span>Nova Conta</span>
+          </button>
         </div>
-        <button class="rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white" @click="openCreate">
-          Nova Conta
-        </button>
-      </header>
+      </div>
 
-      <section class="space-y-3">
-        <article v-for="account in accountsStore.accounts" :key="account.id" class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div class="flex items-start justify-between gap-2">
-            <div>
-              <p class="text-lg font-bold text-slate-900">{{ account.name }}</p>
-              <p class="text-sm text-slate-500">{{ account.type === 'conta' ? 'Conta' : 'Cartão' }} • {{ ownerLabel(account.owner_slot as string) }}</p>
+      <!-- Accounts Grid -->
+      <section class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <article 
+          v-for="account in accountsStore.accounts" 
+          :key="account.id" 
+          class="group relative overflow-hidden rounded-2xl border border-slate-200/50 bg-white p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary-200"
+        >
+          <!-- Background gradient on hover -->
+          <div class="absolute inset-0 bg-gradient-to-br from-primary-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
+          
+          <!-- Content -->
+          <div class="relative z-10">
+            <div class="mb-4 flex items-start justify-between gap-2">
+              <div class="flex-1">
+                <h3 class="text-xl font-bold text-slate-900">{{ account.name }}</h3>
+                <p class="mt-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  <span class="inline-block h-2 w-2 rounded-full" :class="account.type === 'conta' ? 'bg-blue-500' : 'bg-purple-500'"></span>
+                  {{ account.type === 'conta' ? 'Conta Corrente' : 'Cartão' }}
+                </p>
+                <p class="mt-2 text-sm text-slate-600">{{ ownerLabel(account.owner_slot as string) }}</p>
+              </div>
+              <div class="text-3xl" :class="account.type === 'conta' ? '🏦' : '💳'"></div>
             </div>
-            <div class="flex gap-2">
-              <button class="rounded-lg bg-slate-100 px-3 py-1 text-sm font-semibold" @click="openEdit(account)">Editar</button>
-              <button class="rounded-lg bg-red-100 px-3 py-1 text-sm font-semibold text-red-700" @click="removeAccount(account.id)">Excluir</button>
+
+            <!-- Actions -->
+            <div class="mt-6 flex gap-2">
+              <button 
+                class="flex-1 rounded-lg border border-primary-300 bg-primary-50 px-3 py-2 text-sm font-semibold text-primary-700 transition-all duration-200 hover:bg-primary-100 active:scale-95"
+                @click="openEdit(account)"
+              >
+                Editar
+              </button>
+              <button 
+                class="flex-1 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition-all duration-200 hover:bg-rose-100 active:scale-95"
+                @click="removeAccount(account.id)"
+              >
+                Excluir
+              </button>
             </div>
           </div>
         </article>
+
+        <!-- Empty State -->
+        <div v-if="accountsStore.accounts.length === 0" class="col-span-full rounded-2xl border-2 border-dashed border-slate-300 p-12 text-center">
+          <div class="text-4xl mb-3">📭</div>
+          <h3 class="text-lg font-semibold text-slate-900">Nenhuma conta criada</h3>
+          <p class="mt-2 text-slate-600">Clique em "Nova Conta" para adicionar sua primeira conta ou cartão</p>
+        </div>
       </section>
     </main>
 

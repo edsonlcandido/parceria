@@ -1,13 +1,15 @@
 <template>
-  <div class="mt-4 flex gap-2 overflow-x-auto pb-1">
+  <div class="flex flex-wrap gap-2">
     <button
       v-for="option in options"
       :key="option.value"
-      class="inline-flex items-center gap-2 rounded-2xl border px-4 py-2 text-sm font-semibold transition"
-      :class="option.value === modelValue ? 'border-slate-400 bg-white text-slate-900 shadow-sm' : 'border-slate-200 bg-slate-100 text-slate-600'"
+      class="inline-flex items-center gap-2 rounded-lg border-2 px-5 py-2.5 text-sm font-semibold transition-all duration-200"
+      :class="option.value === modelValue 
+        ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-md' 
+        : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'"
       @click="emit('update:modelValue', option.value)"
     >
-      <component :is="option.icon" class="h-4 w-4" />
+      <component :is="option.icon" class="h-5 w-5" />
       <span>{{ option.label }}</span>
     </button>
   </div>

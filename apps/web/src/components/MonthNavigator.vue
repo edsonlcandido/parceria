@@ -1,25 +1,25 @@
 <template>
-  <div class="rounded-3xl bg-gradient-to-r from-teal-400 to-cyan-300 px-4 py-4 shadow-md">
+  <div class="rounded-2xl bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 px-6 py-5 shadow-lg">
     <div class="flex items-center justify-between">
       <button
-        class="rounded-full p-2 text-slate-800 hover:bg-white/30"
+        class="rounded-lg p-2 text-white/80 transition-all duration-200 hover:bg-white/20 active:scale-95"
         @click="moveMonth(-1)"
         aria-label="Mês anterior"
       >
-        <ChevronLeftIcon class="h-5 w-5" />
+        <ChevronLeftIcon class="h-6 w-6" />
       </button>
 
-      <div class="flex items-center gap-2 text-slate-900">
+      <div class="flex items-center gap-3 text-white">
         <CalendarDaysIcon class="h-5 w-5" />
-        <strong class="text-xl">{{ monthLabel }}</strong>
+        <strong class="text-lg font-semibold">{{ monthLabel }}</strong>
       </div>
 
       <button
-        class="rounded-full p-2 text-slate-800 hover:bg-white/30"
+        class="rounded-lg p-2 text-white/80 transition-all duration-200 hover:bg-white/20 active:scale-95"
         @click="moveMonth(1)"
         aria-label="Próximo mês"
       >
-        <ChevronRightIcon class="h-5 w-5" />
+        <ChevronRightIcon class="h-6 w-6" />
       </button>
     </div>
   </div>
