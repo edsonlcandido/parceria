@@ -1,52 +1,74 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import pb from '../services/pocketbase'
-import LoginView from '../views/LoginView.vue'
+import { useCoupleStore } from '../stores/couple'
+import OnboardingView from '../views/OnboardingView.vue'
 import DashboardView from '../views/DashboardView.vue'
+import AccountsView from '../views/AccountsView.vue'
 
 const router = createRouter({
   history: createWebHistory('/app/'),
   routes: [
     {
       path: '/',
-      redirect: '/dashboard',
-    },
-    {
-      path: '/login',
-      name: 'login',
-      component: LoginView,
-      meta: { requiresGuest: true },
+      name: 'onboarding',
+      component: OnboardingView,
     },
     {
       path: '/dashboard',
       name: 'dashboard',
       component: DashboardView,
-      meta: { requiresAuth: true },
+      meta: { requiresToken: true },
+    },
+    {
+      path: '/contas',
+      name: 'accounts',
+      component: AccountsView,
+      meta: { requiresToken: true },
     },
   ],
 })
 
-// Navigation guard - verifica a autenticação com o servidor
-router.beforeEach(async (to, _from, next) => {
-  let isAuthenticated = pb.authStore.isValid && !!pb.authStore.model
+function withToken(path: string, token: string) {
+  return { path, query: { access_token: token } }
+}
 
-  // Para rotas que requerem autenticação, verifica com o servidor
-  if (to.meta.requiresAuth && isAuthenticated) {
-    try {
-      await pb.collection('users').authRefresh()
-    } catch (error) {
-      // Token inválido ou usuário não existe mais
-      pb.authStore.clear()
-      isAuthenticated = false
+router.beforeEach(async (to, _from, next) => {
+  const coupleStore = useCoupleStore()
+  const queryToken = typeof to.query.access_token === 'string' ? to.query.access_token : ''
+  const storedToken = coupleStore.getStoredToken()
+  const token = queryToken || storedToken
+
+  if (!token && to.meta.requiresToken) {
+    coupleStore.clear()
+    next({ path: '/' })
+    return
+  }
+
+  if (token && queryToken !== token) {
+    next(withToken(to.path, token))
+    return
+  }
+
+  if (!token) {
+    next()
+    return
+  }
+
+  if (!coupleStore.isReady || coupleStore.accessToken !== token) {
+    const ok = await coupleStore.loadByToken(token)
+
+    if (!ok) {
+      coupleStore.clear()
+      next({ path: '/' })
+      return
     }
   }
 
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    next('/login')
-  } else if (to.meta.requiresGuest && isAuthenticated) {
-    next('/dashboard')
-  } else {
-    next()
+  if (to.path === '/') {
+    next(withToken('/dashboard', token))
+    return
   }
+
+  next()
 })
 
 export default router

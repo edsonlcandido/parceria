@@ -2,7 +2,7 @@
 
 ## 1. Visão Geral
 
-Parceria Finance é uma aplicação mobile-first para acompanhamento financeiro de casal. O objetivo é permitir uma visão simples e compartilhada das finanças, com foco em saldos atuais, movimentações mensais e separação entre valores do casal, do Usuário 1 e do Usuário 2.
+Parceria Finance é uma aplicação mobile-first para acompanhamento financeiro de casal. O objetivo é permitir uma visão simples e compartilhada das finanças, com foco em saldos atuais, movimentações mensais e separação entre valores totais do casal e por usuário vinculado.
 
 O produto não terá login no v1. O acesso será feito por uma URL com token secreto do casal, funcionando como um modelo multi-tenant simples.
 
@@ -37,14 +37,15 @@ Permitir que um casal acompanhe suas finanças em uma visão consolidada e tamb�
 O produto deve permitir:
 
 - Criar automaticamente um novo casal ao acessar /app/ pela primeira vez.
+- Criar automaticamente os usuários iniciais do casal no onboarding e vinculá-los ao casal.
 - Gerar uma URL de acesso com token secreto do casal.
 - Criar contas dos tipos conta e cartão.
-- Vincular cada conta ao casal, ao Usuário 1 ou ao Usuário 2.
+- Vincular cada conta a um usuário do casal por `user_id`.
 - Adicionar lançamentos de receita e despesa.
 - Atualizar o saldo das contas exclusivamente por lançamentos.
 - Criar o saldo inicial da conta como um lançamento automático.
 - Mostrar saldo do mês com navegação por mês.
-- Filtrar visualização por casal, Usuário 1 ou Usuário 2.
+- Filtrar visualização por todos do casal, Usuário 1 ou Usuário 2.
 - Exibir lista de lançamentos com rolagem horizontal em layout mobile.
 - Fazer CRUD de contas e lançamentos usando drawers.
 
@@ -71,16 +72,17 @@ O produto deve permitir:
 
 1. Usuário acessa /app/.
 2. O sistema cria automaticamente um registro de casal.
-3. O sistema gera um access_token secreto.
-4. O usuário é redirecionado para /app/dashboard?access_token=:token.
-5. A partir dessa URL, o casal passa a acessar e editar os próprios dados.
+3. O sistema cria automaticamente os usuários iniciais vinculados ao casal.
+4. O sistema gera um access_token secreto.
+5. O usuário é redirecionado para /app/dashboard?access_token=:token.
+6. A partir dessa URL, o casal passa a acessar e editar os próprios dados.
 
 ### 8.2 Criação de conta
 
 1. Usuário abre o drawer de nova conta.
 2. Informa nome da conta.
 3. Escolhe tipo: conta ou cartão.
-4. Escolhe responsável: casal, Usuário 1 ou Usuário 2.
+4. Escolhe o usuário dono da conta (Usuário 1 ou Usuário 2).
 5. Informa saldo inicial opcional.
 6. Ao salvar, a conta é criada.
 7. Se houver saldo inicial, o sistema cria automaticamente um lançamento correspondente.
@@ -91,16 +93,17 @@ O produto deve permitir:
 2. Seleciona a conta.
 3. Informa valor.
 4. Define tipo: receita ou despesa.
-5. Informa descrição.
-6. Define data.
-7. Define se está consolidado.
-8. Salva o lançamento.
-9. O saldo da conta e os cards do dashboard são recalculados.
+5. Define o usuário responsável pelo lançamento.
+6. Informa descrição.
+7. Define data.
+8. Define se está consolidado.
+9. Salva o lançamento.
+10. O saldo da conta e os cards do dashboard são recalculados.
 
 ### 8.4 Navegação do dashboard
 
 1. Usuário alterna o mês no cabeçalho.
-2. Usuário filtra por casal, Usuário 1 ou Usuário 2.
+2. Usuário filtra por todos do casal, Usuário 1 ou Usuário 2.
 3. O sistema recalcula cards e listagem com base no filtro selecionado.
 
 ## 9. Requisitos Funcionais
@@ -108,6 +111,7 @@ O produto deve permitir:
 ### 9.1 Tenant e acesso
 
 - O sistema deve criar um novo casal ao acessar /app/ quando não houver tenant ativo.
+- O sistema deve criar os usuários iniciais vinculados ao casal durante o onboarding.
 - O sistema deve gerar um token secreto único para cada casal.
 - O sistema deve carregar dados com base no access_token informado na URL.
 - O sistema não deve usar couple_id puro como chave pública de acesso.
@@ -116,7 +120,7 @@ O produto deve permitir:
 
 - O sistema deve permitir criar contas do tipo conta.
 - O sistema deve permitir criar contas do tipo cartão.
-- O sistema deve permitir vincular a conta ao casal, ao Usuário 1 ou ao Usuário 2.
+- O sistema deve permitir vincular a conta a um usuário por `user_id`.
 - O sistema deve permitir editar conta.
 - O sistema deve permitir excluir conta.
 - O sistema deve recalcular o saldo com base nos lançamentos da conta.
@@ -125,6 +129,7 @@ O produto deve permitir:
 
 - O sistema deve permitir criar lançamentos de receita.
 - O sistema deve permitir criar lançamentos de despesa.
+- O sistema deve permitir vincular o lançamento a um usuário por `user_id`.
 - O sistema deve permitir editar lançamentos.
 - O sistema deve permitir excluir lançamentos.
 - O sistema deve permitir marcar lançamento como consolidado ou não.
@@ -136,7 +141,7 @@ O produto deve permitir:
 - O sistema deve exibir cards de Contas, Cartões, Receitas e Despesas.
 - O sistema deve exibir o Saldo do Mês em destaque.
 - O sistema deve permitir navegar entre meses.
-- O sistema deve permitir filtrar por casal, Usuário 1 e Usuário 2.
+- O sistema deve permitir filtrar por todos do casal, Usuário 1 e Usuário 2.
 - O sistema deve listar os lançamentos do período em tabela com rolagem horizontal.
 
 ### 9.5 UI mobile-first
@@ -153,7 +158,7 @@ O produto deve permitir:
 - O card Contas deve mostrar o saldo atual acumulado das contas do tipo conta.
 - Receitas e Despesas devem considerar apenas o mês selecionado no dashboard.
 - O Saldo do Mês deve ser calculado por receitas do mês menos despesas do mês.
-- O filtro por responsável deve considerar três opções: casal, Usuário 1 e Usuário 2.
+- O filtro por responsável deve considerar três opções: todos do casal, Usuário 1 e Usuário 2.
 - O lançamento inicial gerado na criação da conta deve entrar nos cálculos normalmente.
 
 ## 11. Modelo de Dados Proposto
@@ -166,27 +171,32 @@ O produto deve permitir:
 - created
 - updated
 
-### 11.2 accounts
+### 11.2 users
 
 - id
 - couple_id
-- owner_slot
+- name
+- created
+- updated
+
+### 11.3 accounts
+
+- id
+- couple_id
+- user_id
 - name
 - type
 - created
 - updated
 
-Valores válidos:
-
-- owner_slot: casal | usuario_1 | usuario_2
 - type: conta | cartao
 
-### 11.3 transactions
+### 11.4 transactions
 
 - id
 - couple_id
 - account_id
-- owner_slot
+- user_id
 - amount
 - description
 - type
@@ -197,14 +207,13 @@ Valores válidos:
 
 Valores válidos:
 
-- owner_slot: casal | usuario_1 | usuario_2
 - type: income | expense
 
 ## 12. Cálculos do Dashboard
 
 ### 12.1 Card Contas
 
-Somatório do saldo atual de todas as contas do tipo conta, respeitando o filtro selecionado.
+Somatório do saldo atual de todas as contas do tipo conta, respeitando o filtro selecionado (todos do casal ou usuário específico).
 
 Formula:
 
@@ -212,7 +221,7 @@ Formula:
 
 ### 12.2 Card Cartões
 
-Somatório do saldo devedor acumulado de todas as contas do tipo cartão, respeitando o filtro selecionado.
+Somatório do saldo devedor acumulado de todas as contas do tipo cartão, respeitando o filtro selecionado (todos do casal ou usuário específico).
 
 Formula:
 
@@ -224,11 +233,11 @@ Exibição esperada:
 
 ### 12.3 Card Receitas
 
-Somatório das receitas do mês selecionado, respeitando o filtro selecionado.
+Somatório das receitas do mês selecionado, respeitando o filtro selecionado (todos do casal ou usuário específico).
 
 ### 12.4 Card Despesas
 
-Somatório das despesas do mês selecionado, respeitando o filtro selecionado.
+Somatório das despesas do mês selecionado, respeitando o filtro selecionado (todos do casal ou usuário específico).
 
 ### 12.5 Saldo do Mês
 
@@ -243,7 +252,7 @@ Formula:
 Elementos principais:
 
 - Navegação por mês no topo.
-- Abas de filtro: Casal, Usuário 1, Usuário 2.
+- Abas de filtro: Todos, Usuário 1, Usuário 2.
 - Cards de resumo financeiro.
 - Destaque para saldo do mês.
 - Botão de novo lançamento.
@@ -265,7 +274,7 @@ Campos mínimos:
 
 - Nome
 - Tipo
-- Responsável
+- Usuário
 - Saldo inicial
 
 ### 13.3 Drawer de lançamento
@@ -275,6 +284,7 @@ Campos mínimos:
 - Conta
 - Valor
 - Tipo
+- Usuário
 - Descrição
 - Data
 - Consolidado
@@ -285,6 +295,7 @@ Campos mínimos:
 - A navegação principal deve ser simples e de baixo atrito.
 - O tempo de carregamento do dashboard deve ser adequado para uso cotidiano.
 - O modelo de acesso deve ser simples, mas não deve expor o tenant apenas por id previsível.
+- O vínculo de dados de contas e lançamentos deve usar `user_id`, sem uso de `owner_slot`.
 
 ## 15. Considerações Técnicas
 
@@ -303,12 +314,13 @@ Campos mínimos:
 ## 17. Critérios de Aceite
 
 - Ao acessar /app/, um novo casal deve poder ser criado automaticamente.
+- O onboarding deve criar e vincular automaticamente os usuários iniciais ao casal via `couple_id`.
 - O sistema deve redirecionar para o dashboard com access_token válido.
 - Deve ser possível criar conta do tipo conta e cartão.
-- Deve ser possível vincular conta a casal, Usuário 1 ou Usuário 2.
+- Deve ser possível vincular conta por `user_id`.
 - O saldo inicial da conta deve ser persistido como lançamento.
 - Deve ser possível criar, editar e excluir lançamentos.
 - O dashboard deve exibir os totais corretos por mês.
-- O dashboard deve responder corretamente ao filtro por casal, Usuário 1 e Usuário 2.
+- O dashboard deve responder corretamente ao filtro por todos do casal, Usuário 1 e Usuário 2.
 - O card Cartões deve mostrar o saldo devedor acumulado.
 - Todas as operações principais devem ser utilizáveis em interface mobile com drawers.

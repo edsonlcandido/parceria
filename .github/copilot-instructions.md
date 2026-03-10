@@ -50,6 +50,48 @@ routerAdd("POST", "/api/admin",
 )
 ```
 
+### 🔴 Migrações JS: `Dao is not defined` (v0.23+)
+
+Se aparecer erro como:
+
+```text
+Error: failed to apply migration ... ReferenceError: Dao is not defined
+```
+
+❌ **Causa comum:** usar padrão antigo de migration com `Dao(db)` e `schema`.
+
+✅ **No PocketBase v0.23+ (inclui v0.36+) use:**
+- `migrate((txApp) => { ... })` em vez de `migrate((db) => { ... })`
+- `txApp.save(collection)` e `txApp.delete(collection)`
+- `txApp.findCollectionByNameOrId(...)` para buscar coleções relacionadas
+- `fields` (com field classes) em vez de `schema`
+
+✅ **Exemplo correto (v0.23+):**
+
+```javascript
+migrate((txApp) => {
+  const collection = new Collection({
+    name: "couples",
+    type: "base",
+    fields: [
+      new TextField({ name: "name" }),
+      new TextField({ name: "access_token", required: true }),
+    ],
+  })
+
+  return txApp.save(collection)
+}, (txApp) => {
+  const collection = txApp.findCollectionByNameOrId("couples")
+  return txApp.delete(collection)
+})
+```
+
+✅ **Checklist rápido para evitar falha de migration:**
+- Não usar `Dao` em `pb_migrations`
+- Não usar `schema` legado
+- Confirmar assinatura `migrate((txApp) => ...)`
+- Rodar com o binário PocketBase da mesma versão do projeto
+
 
 
 ## 📌 Padrões de Código Esperados
