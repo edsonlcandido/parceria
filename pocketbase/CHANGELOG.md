@@ -1,3 +1,44 @@
+## v0.36.6
+
+- Set `NumberField.OnlyInt:true` for the generated View collection schema fields when a view column expression is known to return int-only values ([#7538](https://github.com/pocketbase/pocketbase/issues/7538)).
+
+- Documented the `unmarshal` JSVM helper ([#7543](https://github.com/pocketbase/pocketbase/issues/7543)).
+
+- Added extra read check after the `Store.GetOrSet` write lock to prevent races overwriting an already existing value.
+
+- Added empty records check for the additional client-side filter's ListRule constraint that was introduced in v0.32.0 ([presentator#206](https://github.com/presentator/presentator/issues/206)).
+
+- Set a fixed `routine.FireAndForget()` debug stack trace limit to 2KB.
+
+- Bumped min Go GitHub action version to 1.26.1 because it comes with some [minor bug and security fixes](https://github.com/golang/go/issues?q=milestone%3AGo1.26.1).
+
+- Typos and other minor doc fixes.
+
+
+## v0.36.5
+
+- Disabled collection and fields name normalization while in IME mode ([#7532](https://github.com/pocketbase/pocketbase/pull/7532); thanks @miaopan607).
+
+- Updated `modernc.org/sqlite` to v1.46.1 _(resets connection state on Tx.Commit failure)_.
+
+
+## v0.36.4
+
+- Made the optional `Bearer` token prefix case-insensitive ([#7525](https://github.com/pocketbase/pocketbase/pull/7525); thanks @benjamesfleming).
+
+- Enabled `$filesystem.s3(...)` and `$filesystem.local(...)` JSVM bindings ([#7526](https://github.com/pocketbase/pocketbase/issues/7526)).
+
+
+## v0.36.3
+
+- Added `Accept-Encoding: identity` to the S3 requests per the suggestion in [#7523](https://github.com/pocketbase/pocketbase/issues/7523).
+    _This should help fixing the 0-bytes file response when S3 API compression is enabled._
+
+- Bumped min Go GitHub action version to 1.26.0 _(it comes with minor [GC performance improvements](https://go.dev/doc/go1.26#runtime))_.
+
+- Other minor fixes _(updated `modernc.org/sqlite` to v1.45.0, updated `goja_nodejs` adding `Buffer.concat`, updated the arguments of `app.DeleteTable(...)`, `app.DeleteView(...)` and other similar methods to make it more clear that they are dangerous and shouldn't be used with untrusted input, etc.)_.
+
+
 ## v0.36.2
 
 - Updated `modernc.org/sqlite` to v1.44.3 _(race check fix)_, `goja` _(circular references fix)_ and other go deps.
