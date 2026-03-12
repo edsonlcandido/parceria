@@ -96,6 +96,12 @@ export const useCoupleStore = defineStore('couple', () => {
     return token
   }
 
+  async function updateUserName(userId: string, newName: string): Promise<void> {
+    await pb.collection('users').update(userId, { name: newName })
+    if (userId === user1Id.value) partner1Name.value = newName
+    if (userId === user2Id.value) partner2Name.value = newName
+  }
+
   function getStoredToken(): string {
     return localStorage.getItem(ACCESS_TOKEN_KEY) || ''
   }
@@ -122,6 +128,7 @@ export const useCoupleStore = defineStore('couple', () => {
     isReady,
     loadByToken,
     initCouple,
+    updateUserName,
     getStoredToken,
     clear,
   }

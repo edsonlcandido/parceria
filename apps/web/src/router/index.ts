@@ -3,6 +3,7 @@ import { useCoupleStore } from '../stores/couple'
 import OnboardingView from '../views/OnboardingView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AccountsView from '../views/AccountsView.vue'
+import SettingsView from '../views/SettingsView.vue'
 
 const router = createRouter({
   history: createWebHistory('/app/'),
@@ -22,6 +23,12 @@ const router = createRouter({
       path: '/contas',
       name: 'accounts',
       component: AccountsView,
+      meta: { requiresToken: true },
+    },
+    {
+      path: '/configuracoes',
+      name: 'settings',
+      component: SettingsView,
       meta: { requiresToken: true },
     },
   ],
