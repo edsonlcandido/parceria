@@ -40,7 +40,7 @@ export const useTransactionsStore = defineStore('transactions', () => {
     }
 
     const result = await pb.collection('transactions').getFullList({
-      sort: '-date,-created',
+      sort: '-date',
       filter: `couple_id = \"${coupleId}\"`,
     })
 

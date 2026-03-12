@@ -28,7 +28,6 @@ export const useCoupleStore = defineStore('couple', () => {
   async function loadUsers(coupleId: string) {
     const users = await pb.collection('users').getFullList({
       filter: `couple_id = "${safeFilterValue(coupleId)}"`,
-      sort: 'created',
     })
     if (users.length >= 1) {
       user1Id.value = users[0].id

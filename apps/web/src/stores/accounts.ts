@@ -23,7 +23,6 @@ export const useAccountsStore = defineStore('accounts', () => {
     }
 
     const result = await pb.collection('accounts').getFullList({
-      sort: '-created',
       filter: `couple_id = \"${coupleId}\"`,
     })
 
