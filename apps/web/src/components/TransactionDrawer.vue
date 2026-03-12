@@ -186,7 +186,7 @@ function submitForm() {
     date: new Date(form.value.date).toISOString(),
     consolidated: !planned.value,
     monthly_budget: form.value.monthly_budget
-      ? new Date(form.value.monthly_budget).toISOString()
+      ? `${form.value.monthly_budget}T17:00:00.000Z`
       : null,
   }
 
