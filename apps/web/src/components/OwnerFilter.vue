@@ -29,9 +29,16 @@ const props = defineProps<{
 
 const emit = defineEmits<{ (e: 'update:modelValue', value: string | null): void }>()
 
-const options = computed(() => [
-  { value: null as string | null, label: 'Casal', icon: UserGroupIcon },
-  { value: props.user1Id, label: props.partner1Name, icon: UserIcon },
-  { value: props.user2Id, label: props.partner2Name, icon: UserIcon },
-])
+const options = computed(() => {
+  const list: { value: string | null; label: string; icon: typeof UserGroupIcon }[] = [
+    { value: null, label: 'Casal', icon: UserGroupIcon },
+  ]
+  if (props.user1Id) {
+    list.push({ value: props.user1Id, label: props.partner1Name, icon: UserIcon })
+  }
+  if (props.user2Id) {
+    list.push({ value: props.user2Id, label: props.partner2Name, icon: UserIcon })
+  }
+  return list
+})
 </script>
