@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type { RecordModel } from 'pocketbase'
 import pb from '../services/pocketbase'
+import { isSameMonth } from '../utils/date'
 
 export interface TransactionPayload {
   couple_id: string
@@ -13,11 +14,6 @@ export interface TransactionPayload {
   date: string
   consolidated: boolean
   monthly_budget?: string | null
-}
-
-function isSameMonth(dateString: string, baseDate: Date): boolean {
-  const date = new Date(dateString)
-  return date.getMonth() === baseDate.getMonth() && date.getFullYear() === baseDate.getFullYear()
 }
 
 export const useTransactionsStore = defineStore('transactions', () => {

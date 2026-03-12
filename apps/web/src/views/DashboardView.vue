@@ -114,6 +114,7 @@ import TransactionDrawer from '../components/TransactionDrawer.vue'
 import { useCoupleStore } from '../stores/couple'
 import { useAccountsStore } from '../stores/accounts'
 import { useTransactionsStore } from '../stores/transactions'
+import { parseLocalDate } from '../utils/date'
 
 const route = useRoute()
 const router = useRouter()
@@ -148,7 +149,7 @@ const totals = computed(() => {
 
     if (isCartao && tx.consolidated) {
       const billingDateStr = (tx.monthly_budget || tx.date) as string
-      const billingDate = new Date(billingDateStr)
+      const billingDate = parseLocalDate(billingDateStr)
       if (
         billingDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
         billingDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
@@ -157,7 +158,7 @@ const totals = computed(() => {
       }
     }
 
-    const monthDate = new Date(tx.date as string)
+    const monthDate = parseLocalDate(tx.date as string)
     const isCurrentMonth =
       monthDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
       monthDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()

@@ -99,6 +99,7 @@ import { useCoupleStore } from '../stores/couple'
 import { useAccountsStore } from '../stores/accounts'
 import { useTransactionsStore } from '../stores/transactions'
 import type { AccountPayload } from '../stores/accounts'
+import { parseLocalDate } from '../utils/date'
 
 const route = useRoute()
 const coupleStore = useCoupleStore()
@@ -130,7 +131,7 @@ const cartaoAccounts = computed(() =>
 
 function isBillingMonth(tx: RecordModel): boolean {
   const dateStr = (tx.monthly_budget || tx.date) as string
-  const d = new Date(dateStr)
+  const d = parseLocalDate(dateStr)
   return (
     d.getMonth() === transactionsStore.selectedMonth.getMonth() &&
     d.getFullYear() === transactionsStore.selectedMonth.getFullYear()
