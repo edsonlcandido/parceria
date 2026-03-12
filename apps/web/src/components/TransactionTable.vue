@@ -1,63 +1,61 @@
 <template>
-  <div class="overflow-hidden rounded-2xl border border-slate-200/50 bg-white shadow-lg">
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-left text-sm">
-        <thead class="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
-          <tr>
-            <th class="px-6 py-4 font-semibold text-slate-700">Parceiro</th>
-            <th class="px-6 py-4 font-semibold text-slate-700">Tipo</th>
-            <th class="px-6 py-4 font-semibold text-slate-700">Conta</th>
-            <th class="px-6 py-4 font-semibold text-slate-700">Descrição</th>
-            <th class="px-6 py-4 font-semibold text-slate-700">Valor</th>
-            <th class="px-6 py-4 font-semibold text-slate-700">Data</th>
-            <th class="px-6 py-4 font-semibold text-slate-700">Ações</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200">
-          <tr v-for="item in rows" :key="item.id" class="transition-colors duration-200 hover:bg-slate-50">
-            <td class="px-6 py-4">
-              <span class="inline-flex rounded-lg px-3 py-1 text-xs font-semibold text-white" :class="ownerClass(item.owner_slot)">
-                {{ ownerLabel(item.owner_slot) }}
-              </span>
-            </td>
-            <td class="px-6 py-4 font-medium text-slate-900">
-              <span class="inline-flex items-center gap-1">
-                <span class="inline-block h-2 w-2 rounded-full" :class="item.type === 'income' ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                {{ item.type === 'income' ? 'Receita' : 'Despesa' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-slate-700">{{ accountName(item.account_id) }}</td>
-            <td class="px-6 py-4 text-slate-600">{{ item.description || '-' }}</td>
-            <td class="px-6 py-4 font-semibold" :class="item.type === 'income' ? 'text-emerald-600' : 'text-rose-600'">
-              {{ formatCurrency(item.amount as number) }}
-            </td>
-            <td class="px-6 py-4 text-slate-600 text-xs">{{ formatDate(item.date as string) }}</td>
-            <td class="px-6 py-4">
-              <div class="flex gap-2">
-                <button 
-                  class="rounded-lg border border-primary-300 bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 transition-all duration-200 hover:bg-primary-100 active:scale-95"
-                  @click="$emit('edit', item)"
-                >
-                  Editar
-                </button>
-                <button 
-                  class="rounded-lg border border-rose-300 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition-all duration-200 hover:bg-rose-100 active:scale-95"
-                  @click="$emit('remove', item.id)"
-                >
-                  Excluir
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="rows.length === 0">
-            <td colspan="7" class="px-6 py-12 text-center text-slate-500">
-              <div class="flex flex-col items-center gap-2">
-                <span class="text-sm">Sem lançamentos no período.</span>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+  <div class="flex flex-col gap-3">
+    <div
+      v-for="item in rows"
+      :key="item.id"
+      class="rounded-xl bg-white p-4 shadow-sm border border-slate-100 active:scale-[0.98] transition-transform duration-150"
+    >
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div
+            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full"
+            :class="item.type === 'income' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'"
+          >
+            <svg v-if="item.type === 'income'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+            </svg>
+            <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <p class="text-sm font-semibold text-slate-900 truncate">{{ item.description || (item.type === 'income' ? 'Receita' : 'Despesa') }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">{{ accountName(item.account_id) }} · {{ ownerLabel(item.owner_slot) }}</p>
+          </div>
+        </div>
+        <div class="text-right shrink-0">
+          <p class="text-sm font-bold" :class="item.type === 'income' ? 'text-emerald-600' : 'text-rose-600'">
+            {{ item.type === 'income' ? '+' : '-' }}{{ formatCurrency(item.amount as number) }}
+          </p>
+          <p class="text-xs text-slate-400 mt-0.5">{{ formatDate(item.date as string) }}</p>
+        </div>
+      </div>
+      <div class="mt-3 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span
+            v-if="item.consolidated"
+            class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700"
+          >Consolidado</span>
+          <span
+            v-else
+            class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700"
+          >Pendente</span>
+        </div>
+        <div class="flex gap-2">
+          <button
+            class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary-600 transition-colors hover:bg-primary-50 active:scale-95"
+            @click="$emit('edit', item)"
+          >Editar</button>
+          <button
+            class="rounded-lg px-3 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 active:scale-95"
+            @click="$emit('remove', item.id)"
+          >Excluir</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="rows.length === 0" class="py-12 text-center text-slate-400">
+      <p class="text-sm">Sem lançamentos no período.</p>
     </div>
   </div>
 </template>
@@ -81,12 +79,6 @@ function ownerLabel(ownerSlot: string) {
   if (ownerSlot === 'usuario_1') return props.partner1Name
   if (ownerSlot === 'usuario_2') return props.partner2Name
   return 'Casal'
-}
-
-function ownerClass(ownerSlot: string) {
-  if (ownerSlot === 'usuario_1') return 'bg-gradient-to-r from-blue-600 to-blue-700'
-  if (ownerSlot === 'usuario_2') return 'bg-gradient-to-r from-cyan-600 to-teal-600'
-  return 'bg-gradient-to-r from-slate-600 to-slate-700'
 }
 
 function accountName(id: string) {
