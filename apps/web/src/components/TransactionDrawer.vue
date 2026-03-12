@@ -64,11 +64,6 @@
           <p class="mt-1 text-xs text-slate-400">Primeiro dia do mês de referência da fatura</p>
         </label>
 
-        <label v-if="!planned" class="flex items-center gap-2">
-          <input v-model="form.consolidated" type="checkbox" />
-          <span class="text-sm font-semibold">Consolidado</span>
-        </label>
-
         <button class="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-slate-800" type="submit">
           Salvar
         </button>
@@ -190,7 +185,7 @@ function submitForm() {
     amount: Number(form.value.amount),
     description: form.value.description,
     date: new Date(form.value.date).toISOString(),
-    consolidated: planned.value ? false : form.value.consolidated,
+    consolidated: !planned.value,
     monthly_budget: !planned.value && isCartaoAccount.value && form.value.monthly_budget
       ? new Date(form.value.monthly_budget).toISOString()
       : null,
