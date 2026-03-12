@@ -46,7 +46,7 @@
 
       <!-- Contas correntes -->
       <section v-if="showContas && contaAccounts.length > 0" class="mb-6">
-        <h2 class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Contas correntes</h2>
+        <h2 class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Contas</h2>
         <div class="space-y-2">
           <AccountCard
             v-for="account in contaAccounts"
