@@ -6,10 +6,30 @@
         <button class="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold" @click="$emit('close')">Fechar</button>
       </div>
 
+      <!-- Toggle Consolidado / Planejado -->
+      <div class="mb-5 flex rounded-xl bg-slate-100 p-1">
+        <button
+          type="button"
+          class="flex-1 rounded-lg py-2 text-sm font-semibold transition-all"
+          :class="!planned ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'"
+          @click="planned = false"
+        >
+          Consolidado
+        </button>
+        <button
+          type="button"
+          class="flex-1 rounded-lg py-2 text-sm font-semibold transition-all"
+          :class="planned ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500'"
+          @click="planned = true"
+        >
+          Planejado
+        </button>
+      </div>
+
       <form class="space-y-4" @submit.prevent="submitForm">
-        <label class="block">
+        <label v-if="!planned" class="block">
           <span class="mb-1 block text-sm font-semibold">Conta</span>
-          <select v-model="form.account_id" class="w-full rounded-xl border border-slate-300 px-3 py-3" required>
+          <select v-model="form.account_id" class="w-full rounded-xl border border-slate-300 px-3 py-3" :required="!planned">
             <option value="" disabled>Selecione</option>
             <option v-for="account in accounts" :key="account.id" :value="account.id">{{ account.name }}</option>
           </select>
@@ -38,13 +58,13 @@
           <input v-model="form.date" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" required />
         </label>
 
-        <label v-if="isCartaoAccount" class="block">
+        <label v-if="!planned && isCartaoAccount" class="block">
           <span class="mb-1 block text-sm font-semibold">Mês da Fatura</span>
           <input v-model="form.monthly_budget" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" />
           <p class="mt-1 text-xs text-slate-400">Primeiro dia do mês de referência da fatura</p>
         </label>
 
-        <label class="flex items-center gap-2">
+        <label v-if="!planned" class="flex items-center gap-2">
           <input v-model="form.consolidated" type="checkbox" />
           <span class="text-sm font-semibold">Consolidado</span>
         </label>
@@ -81,6 +101,8 @@ function firstDayOfMonth(date: Date): string {
   return d.toISOString().slice(0, 10)
 }
 
+const planned = ref(false)
+
 const isCartaoAccount = computed(() => {
   const account = props.accounts.find((a) => a.id === form.value.account_id)
   return account?.type === 'cartao'
@@ -103,6 +125,7 @@ watch(
   ([value]) => {
     const baseMonth = props.selectedMonth ?? new Date()
     if (!value) {
+      planned.value = false
       if (props.prefilledAccountId) {
         form.value = {
           account_id: props.prefilledAccountId,
@@ -126,6 +149,9 @@ watch(
       }
       return
     }
+
+    const hasAccount = !!(value.account_id as string)
+    planned.value = !hasAccount
 
     form.value = {
       account_id: (value.account_id as string) || '',
@@ -152,17 +178,20 @@ watch(
 )
 
 function submitForm() {
-  const selectedAccount = props.accounts.find((acc) => acc.id === form.value.account_id)
+  const selectedAccount = planned.value
+    ? null
+    : props.accounts.find((acc) => acc.id === form.value.account_id)
+
   const payload: TransactionPayload = {
     couple_id: props.coupleId,
-    account_id: form.value.account_id,
+    account_id: planned.value ? null : form.value.account_id,
     user_id: selectedAccount?.user_id || null,
     type: form.value.type,
     amount: Number(form.value.amount),
     description: form.value.description,
     date: new Date(form.value.date).toISOString(),
-    consolidated: form.value.consolidated,
-    monthly_budget: isCartaoAccount.value && form.value.monthly_budget
+    consolidated: planned.value ? false : form.value.consolidated,
+    monthly_budget: !planned.value && isCartaoAccount.value && form.value.monthly_budget
       ? new Date(form.value.monthly_budget).toISOString()
       : null,
   }

@@ -5,7 +5,7 @@ import pb from '../services/pocketbase'
 
 export interface TransactionPayload {
   couple_id: string
-  account_id: string
+  account_id: string | null
   user_id: string | null
   amount: number
   description?: string
