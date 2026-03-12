@@ -71,14 +71,17 @@ const form = ref({
 
 const editing = computed(() => !!props.model)
 
+function resetForm() {
+  form.value = { name: '', type: 'conta', user_id: null, initialBalance: 0 }
+}
+
 watch(
   () => props.model,
   (value) => {
     if (!value) {
-      form.value = { name: '', type: 'conta', user_id: null, initialBalance: 0 }
+      resetForm()
       return
     }
-
     form.value = {
       name: (value.name as string) || '',
       type: (value.type as AccountType) || 'conta',
@@ -87,6 +90,13 @@ watch(
     }
   },
   { immediate: true }
+)
+
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen && !props.model) resetForm()
+  }
 )
 
 function submitForm() {
