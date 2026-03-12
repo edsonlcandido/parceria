@@ -12,6 +12,8 @@
           v-model="transactionsStore.selectedOwner"
           :partner1-name="coupleStore.partner1Name"
           :partner2-name="coupleStore.partner2Name"
+          :user1-id="coupleStore.user1Id"
+          :user2-id="coupleStore.user2Id"
         />
       </div>
 
@@ -57,6 +59,8 @@
           :accounts="accountsStore.accounts"
           :partner1-name="coupleStore.partner1Name"
           :partner2-name="coupleStore.partner2Name"
+          :user1-id="coupleStore.user1Id"
+          :user2-id="coupleStore.user2Id"
           @edit="openEditDrawer"
           @remove="removeTransaction"
         />
@@ -70,6 +74,8 @@
       :accounts="accountsStore.accounts"
       :partner1-name="coupleStore.partner1Name"
       :partner2-name="coupleStore.partner2Name"
+      :user1-id="coupleStore.user1Id"
+      :user2-id="coupleStore.user2Id"
       @close="closeDrawer"
       @save="saveTransaction"
     />

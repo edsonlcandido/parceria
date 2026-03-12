@@ -44,6 +44,14 @@ Builds both frontends and copies them to `pocketbase/pb_public/`. PocketBase the
 - PocketBase URL configured via `VITE_POCKETBASE_URL` env var (defaults to `http://localhost:8090`)
 - PocketBase binary: `pocketbase/pocketbase` (extracted from zip in pocketbase directory)
 
+## Data Model (PocketBase Collections)
+- **couples**: id, name, access_token
+- **users** (auth): id, name, couple_id (relation → couples, cascade delete), email (optional)
+- **accounts**: id, couple_id (relation → couples), user_id (relation → users, nullable), name, type (conta|cartao)
+- **transactions**: id, couple_id (relation → couples), account_id (relation → accounts), user_id (relation → users, nullable), amount, description, type (income|expense), date, consolidated
+
+V1: No login. Access via URL with secret token. user_id=null means "Casal" (shared). All collection rules are open ('').
+
 ## Key Files
 - `package.json` - Root monorepo config with workspaces and scripts
 - `apps/landing/vite.config.ts` - Landing page Vite config (port 5000, proxies to web app and PocketBase)

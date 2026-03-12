@@ -4,11 +4,10 @@ import type { RecordModel } from 'pocketbase'
 import pb from '../services/pocketbase'
 
 export type AccountType = 'conta' | 'cartao'
-export type OwnerSlot = 'casal' | 'usuario_1' | 'usuario_2'
 
 export interface AccountPayload {
   couple_id: string
-  owner_slot: OwnerSlot
+  user_id: string | null
   name: string
   type: AccountType
   initialBalance?: number
@@ -50,7 +49,7 @@ export const useAccountsStore = defineStore('accounts', () => {
       await pb.collection('transactions').create({
         couple_id: created.couple_id,
         account_id: created.id,
-        owner_slot: created.owner_slot,
+        user_id: created.user_id || null,
         amount: positive,
         description: 'Saldo inicial',
         type: transactionType,

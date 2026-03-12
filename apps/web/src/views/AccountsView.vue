@@ -37,7 +37,7 @@
                   <span class="inline-block h-2 w-2 rounded-full" :class="account.type === 'conta' ? 'bg-blue-500' : 'bg-purple-500'"></span>
                   {{ account.type === 'conta' ? 'Conta Corrente' : 'Cartão' }}
                 </p>
-                <p class="mt-2 text-sm text-slate-600">{{ ownerLabel(account.owner_slot as string) }}</p>
+                <p class="mt-2 text-sm text-slate-600">{{ ownerLabel(account.user_id as string | null) }}</p>
               </div>
               <div class="text-3xl" :class="account.type === 'conta' ? '🏦' : '💳'"></div>
             </div>
@@ -75,6 +75,8 @@
       :couple-id="coupleStore.id || ''"
       :partner1-name="coupleStore.partner1Name"
       :partner2-name="coupleStore.partner2Name"
+      :user1-id="coupleStore.user1Id"
+      :user2-id="coupleStore.user2Id"
       @close="closeDrawer"
       @save="saveAccount"
     />
@@ -106,10 +108,11 @@ onMounted(async () => {
   }
 })
 
-function ownerLabel(ownerSlot: string) {
-  if (ownerSlot === 'usuario_1') return coupleStore.partner1Name
-  if (ownerSlot === 'usuario_2') return coupleStore.partner2Name
-  return 'Casal'
+function ownerLabel(userId: string | null) {
+  if (!userId) return 'Casal'
+  if (userId === coupleStore.user1Id) return coupleStore.partner1Name
+  if (userId === coupleStore.user2Id) return coupleStore.partner2Name
+  return 'Outro'
 }
 
 function openCreate() {

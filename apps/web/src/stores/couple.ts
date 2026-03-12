@@ -2,8 +2,6 @@ import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import pb from '../services/pocketbase'
 
-export type OwnerSlot = 'casal' | 'usuario_1' | 'usuario_2'
-
 const ACCESS_TOKEN_KEY = 'parceria_access_token'
 
 function safeFilterValue(value: string): string {
@@ -53,8 +51,6 @@ export const useCoupleStore = defineStore('couple', () => {
       id.value = record.id
       name.value = (record.name as string) || 'Nossa Parceria'
       accessToken.value = token
-      partner1Name.value = (record.partner1_name as string) || 'Usuário 1'
-      partner2Name.value = (record.partner2_name as string) || 'Usuário 2'
       localStorage.setItem(ACCESS_TOKEN_KEY, token)
 
       await loadUsers(record.id)
@@ -70,15 +66,11 @@ export const useCoupleStore = defineStore('couple', () => {
     const created = await pb.collection('couples').create({
       name: 'Nossa Parceria',
       access_token: token,
-      partner1_name: 'Usuário 1',
-      partner2_name: 'Usuário 2',
     })
 
     id.value = created.id
     name.value = (created.name as string) || 'Nossa Parceria'
     accessToken.value = token
-    partner1Name.value = (created.partner1_name as string) || 'Usuário 1'
-    partner2Name.value = (created.partner2_name as string) || 'Usuário 2'
     localStorage.setItem(ACCESS_TOKEN_KEY, token)
 
     const pwd1 = generateToken(16)
@@ -89,6 +81,7 @@ export const useCoupleStore = defineStore('couple', () => {
       passwordConfirm: pwd1,
     })
     user1Id.value = u1.id
+    partner1Name.value = 'Usuário 1'
 
     const pwd2 = generateToken(16)
     const u2 = await pb.collection('users').create({
@@ -98,6 +91,7 @@ export const useCoupleStore = defineStore('couple', () => {
       passwordConfirm: pwd2,
     })
     user2Id.value = u2.id
+    partner2Name.value = 'Usuário 2'
 
     return token
   }

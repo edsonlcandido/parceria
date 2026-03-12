@@ -22,10 +22,10 @@
 
         <label class="block">
           <span class="mb-1 block text-sm font-semibold">Responsável</span>
-          <select v-model="form.owner_slot" class="w-full rounded-xl border border-slate-300 px-3 py-3" required>
-            <option value="casal">Casal</option>
-            <option value="usuario_1">{{ partner1Name }}</option>
-            <option value="usuario_2">{{ partner2Name }}</option>
+          <select v-model="form.user_id" class="w-full rounded-xl border border-slate-300 px-3 py-3">
+            <option :value="null">Casal</option>
+            <option v-if="user1Id" :value="user1Id">{{ partner1Name }}</option>
+            <option v-if="user2Id" :value="user2Id">{{ partner2Name }}</option>
           </select>
         </label>
 
@@ -34,7 +34,7 @@
           <input v-model.number="form.initialBalance" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="number" step="0.01" />
         </label>
 
-        <button class="w-full rounded-xl bg-blue-600 px-4 py-3 font-semibold text-white hover:bg-blue-700" type="submit">
+        <button class="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-slate-800" type="submit">
           Salvar
         </button>
       </form>
@@ -45,13 +45,15 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import type { RecordModel } from 'pocketbase'
-import type { AccountPayload, AccountType, OwnerSlot } from '../stores/accounts'
+import type { AccountPayload, AccountType } from '../stores/accounts'
 
 const props = defineProps<{
   open: boolean
   coupleId: string
   partner1Name: string
   partner2Name: string
+  user1Id: string | null
+  user2Id: string | null
   model?: RecordModel | null
 }>()
 
@@ -63,7 +65,7 @@ const emit = defineEmits<{
 const form = ref({
   name: '',
   type: 'conta' as AccountType,
-  owner_slot: 'casal' as OwnerSlot,
+  user_id: null as string | null,
   initialBalance: 0,
 })
 
@@ -76,7 +78,7 @@ watch(
       form.value = {
         name: '',
         type: 'conta',
-        owner_slot: 'casal',
+        user_id: null,
         initialBalance: 0,
       }
       return
@@ -85,7 +87,7 @@ watch(
     form.value = {
       name: (value.name as string) || '',
       type: (value.type as AccountType) || 'conta',
-      owner_slot: (value.owner_slot as OwnerSlot) || 'casal',
+      user_id: (value.user_id as string) || null,
       initialBalance: 0,
     }
   },
@@ -99,7 +101,7 @@ function submitForm() {
       couple_id: props.coupleId,
       name: form.value.name,
       type: form.value.type,
-      owner_slot: form.value.owner_slot,
+      user_id: form.value.user_id,
       initialBalance: Number(form.value.initialBalance || 0),
     },
   })

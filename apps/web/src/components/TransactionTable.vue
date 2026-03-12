@@ -20,7 +20,7 @@
           </div>
           <div class="min-w-0">
             <p class="text-sm font-semibold text-slate-900 truncate">{{ item.description || (item.type === 'income' ? 'Receita' : 'Despesa') }}</p>
-            <p class="text-xs text-slate-400 mt-0.5">{{ accountName(item.account_id) }} · {{ ownerLabel(item.owner_slot) }}</p>
+            <p class="text-xs text-slate-400 mt-0.5">{{ accountName(item.account_id) }} · {{ ownerLabel(item.user_id) }}</p>
           </div>
         </div>
         <div class="text-right shrink-0">
@@ -43,7 +43,7 @@
         </div>
         <div class="flex gap-2">
           <button
-            class="rounded-lg px-3 py-1.5 text-xs font-semibold text-primary-600 transition-colors hover:bg-primary-50 active:scale-95"
+            class="rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 active:scale-95"
             @click="$emit('edit', item)"
           >Editar</button>
           <button
@@ -68,6 +68,8 @@ const props = defineProps<{
   accounts: RecordModel[]
   partner1Name: string
   partner2Name: string
+  user1Id: string | null
+  user2Id: string | null
 }>()
 
 defineEmits<{
@@ -75,10 +77,11 @@ defineEmits<{
   (e: 'remove', id: string): void
 }>()
 
-function ownerLabel(ownerSlot: string) {
-  if (ownerSlot === 'usuario_1') return props.partner1Name
-  if (ownerSlot === 'usuario_2') return props.partner2Name
-  return 'Casal'
+function ownerLabel(userId: string | null) {
+  if (!userId) return 'Casal'
+  if (userId === props.user1Id) return props.partner1Name
+  if (userId === props.user2Id) return props.partner2Name
+  return 'Outro'
 }
 
 function accountName(id: string) {

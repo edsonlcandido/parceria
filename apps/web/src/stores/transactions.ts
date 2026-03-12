@@ -3,12 +3,10 @@ import { computed, ref } from 'vue'
 import type { RecordModel } from 'pocketbase'
 import pb from '../services/pocketbase'
 
-export type OwnerSlot = 'casal' | 'usuario_1' | 'usuario_2'
-
 export interface TransactionPayload {
   couple_id: string
   account_id: string
-  owner_slot: OwnerSlot
+  user_id: string | null
   amount: number
   description?: string
   type: 'income' | 'expense'
@@ -24,11 +22,11 @@ function isSameMonth(dateString: string, baseDate: Date): boolean {
 export const useTransactionsStore = defineStore('transactions', () => {
   const transactions = ref<RecordModel[]>([])
   const selectedMonth = ref(new Date())
-  const selectedOwner = ref<OwnerSlot>('casal')
+  const selectedOwner = ref<string | null>(null)
 
   const byOwner = computed(() => {
-    if (selectedOwner.value === 'casal') return transactions.value
-    return transactions.value.filter((tx) => tx.owner_slot === selectedOwner.value)
+    if (selectedOwner.value === null) return transactions.value
+    return transactions.value.filter((tx) => tx.user_id === selectedOwner.value)
   })
 
   const monthTransactions = computed(() => {
