@@ -15,8 +15,8 @@
         />
       </div>
 
-      <!-- Summary Cards Grid -->
-      <section class="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <!-- Summary Cards -->
+      <section class="mb-10 flex flex-col gap-3">
         <SummaryCard label="Contas" type="conta" :value="totals.contas" />
         <SummaryCard label="Cartões" type="cartao" :value="totals.cartoes" />
         <SummaryCard label="Receitas" type="income" :value="totals.receitas" />
