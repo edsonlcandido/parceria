@@ -75,52 +75,40 @@
       </section>
     </main>
 
-    <!-- Actions bottom sheet -->
-    <Transition
-      enter-active-class="transition-all duration-300 ease-out"
-      leave-active-class="transition-all duration-200 ease-in"
-    >
-      <div v-if="actionsAccount" class="fixed inset-0 z-50 flex flex-col justify-end" @click.self="actionsAccount = null">
-        <div class="absolute inset-0 bg-slate-900/40" @click="actionsAccount = null" />
-        <div class="relative rounded-t-3xl bg-white px-5 pb-10 pt-5 shadow-2xl">
-          <div class="mb-4 flex items-center justify-between">
-            <div>
-              <p class="font-bold text-slate-900">{{ actionsAccount.name }}</p>
-              <p class="text-xs text-slate-500">{{ actionsAccount.type === 'conta' ? 'Conta corrente' : 'Cartão de crédito' }}</p>
-            </div>
-            <button
-              class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500"
-              @click="actionsAccount = null"
-            >
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+    <!-- Actions drawer (direita → esquerda) -->
+    <div v-if="actionsAccount" class="fixed inset-0 z-50 bg-slate-900/40" @click.self="actionsAccount = null">
+      <div class="ml-auto h-full w-full max-w-md overflow-y-auto bg-white p-5 shadow-2xl">
+        <div class="mb-6 flex items-center justify-between">
+          <div>
+            <h3 class="text-2xl font-bold text-slate-900">{{ actionsAccount.name }}</h3>
+            <p class="mt-0.5 text-sm text-slate-500">{{ actionsAccount.type === 'conta' ? 'Conta corrente' : 'Cartão de crédito' }}</p>
           </div>
-          <div class="space-y-2">
-            <button
-              class="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3.5 text-sm font-semibold text-slate-700 active:scale-[0.98] transition-transform"
-              @click="openEdit(actionsAccount); actionsAccount = null"
-            >
-              <svg class="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.536-6.536a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 14H9v-3z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18" />
-              </svg>
-              Editar conta
-            </button>
-            <button
-              class="flex w-full items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3.5 text-sm font-semibold text-rose-600 active:scale-[0.98] transition-transform"
-              @click="removeAccount(actionsAccount.id); actionsAccount = null"
-            >
-              <svg class="h-5 w-5 text-rose-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Excluir conta
-            </button>
-          </div>
+          <button class="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold" @click="actionsAccount = null">Fechar</button>
+        </div>
+
+        <div class="space-y-3">
+          <button
+            class="flex w-full items-center gap-3 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm font-semibold text-slate-700 active:scale-[0.98] transition-transform"
+            @click="openEdit(actionsAccount); actionsAccount = null"
+          >
+            <svg class="h-5 w-5 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536M9 11l6.536-6.536a2 2 0 012.828 0l.172.172a2 2 0 010 2.828L12 14H9v-3z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 21h18" />
+            </svg>
+            Editar conta
+          </button>
+          <button
+            class="flex w-full items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-4 text-sm font-semibold text-rose-600 active:scale-[0.98] transition-transform"
+            @click="removeAccount(actionsAccount.id); actionsAccount = null"
+          >
+            <svg class="h-5 w-5 text-rose-400" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Excluir conta
+          </button>
         </div>
       </div>
-    </Transition>
+    </div>
 
     <AccountDrawer
       :open="drawerOpen"
