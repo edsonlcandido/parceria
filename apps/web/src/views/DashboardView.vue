@@ -149,6 +149,7 @@ const totals = computed(() => {
 
     const monthDate = new Date(tx.date as string)
     if (
+      !isCartao &&
       monthDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
       monthDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
     ) {
