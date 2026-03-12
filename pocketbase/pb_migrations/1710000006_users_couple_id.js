@@ -2,8 +2,12 @@ migrate((txApp) => {
   const couples = txApp.findCollectionByNameOrId('couples')
   const users = txApp.findCollectionByNameOrId('users')
 
+  const emailField = users.fields.getByName('email')
+  if (emailField) {
+    emailField.required = false
+  }
+
   users.fields.add(
-    new EmailField({ name: 'email', required: false }),
     new RelationField({
       name: 'couple_id',
       collectionId: couples.id,
@@ -22,9 +26,11 @@ migrate((txApp) => {
 }, (txApp) => {
   const users = txApp.findCollectionByNameOrId('users')
 
-  users.fields.add(
-    new EmailField({ name: 'email', required: true })
-  )
+  const emailField = users.fields.getByName('email')
+  if (emailField) {
+    emailField.required = true
+  }
+
   users.fields.removeByName('couple_id')
 
   users.listRule = null
