@@ -15,7 +15,6 @@
           </select>
         </label>
 
-
         <label class="block">
           <span class="mb-1 block text-sm font-semibold">Tipo</span>
           <select v-model="form.type" class="w-full rounded-xl border border-slate-300 px-3 py-3" required>
@@ -37,6 +36,12 @@
         <label class="block">
           <span class="mb-1 block text-sm font-semibold">Data</span>
           <input v-model="form.date" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" required />
+        </label>
+
+        <label v-if="isCartaoAccount" class="block">
+          <span class="mb-1 block text-sm font-semibold">Mês da Fatura</span>
+          <input v-model="form.monthly_budget" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" />
+          <p class="mt-1 text-xs text-slate-400">Primeiro dia do mês de referência da fatura</p>
         </label>
 
         <label class="flex items-center gap-2">
@@ -63,12 +68,23 @@ const props = defineProps<{
   accounts: RecordModel[]
   model?: RecordModel | null
   prefilledAccountId?: string
+  selectedMonth?: Date
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'save', payload: { id?: string; data: TransactionPayload }): void
 }>()
+
+function firstDayOfMonth(date: Date): string {
+  const d = new Date(date.getFullYear(), date.getMonth(), 1)
+  return d.toISOString().slice(0, 10)
+}
+
+const isCartaoAccount = computed(() => {
+  const account = props.accounts.find((a) => a.id === form.value.account_id)
+  return account?.type === 'cartao'
+})
 
 const form = ref({
   account_id: '',
@@ -77,6 +93,7 @@ const form = ref({
   description: '',
   date: new Date().toISOString().slice(0, 10),
   consolidated: false,
+  monthly_budget: '',
 })
 
 const editing = computed(() => !!props.model)
@@ -84,6 +101,7 @@ const editing = computed(() => !!props.model)
 watch(
   () => [props.model, props.open, props.prefilledAccountId] as const,
   ([value]) => {
+    const baseMonth = props.selectedMonth ?? new Date()
     if (!value) {
       if (props.prefilledAccountId) {
         form.value = {
@@ -93,6 +111,7 @@ watch(
           description: 'Saldo inicial',
           date: new Date().toISOString().slice(0, 10),
           consolidated: true,
+          monthly_budget: firstDayOfMonth(baseMonth),
         }
       } else {
         form.value = {
@@ -102,6 +121,7 @@ watch(
           description: '',
           date: new Date().toISOString().slice(0, 10),
           consolidated: false,
+          monthly_budget: firstDayOfMonth(baseMonth),
         }
       }
       return
@@ -114,9 +134,21 @@ watch(
       description: (value.description as string) || '',
       date: new Date(value.date as string).toISOString().slice(0, 10),
       consolidated: !!value.consolidated,
+      monthly_budget: value.monthly_budget
+        ? new Date(value.monthly_budget as string).toISOString().slice(0, 10)
+        : firstDayOfMonth(baseMonth),
     }
   },
   { immediate: true }
+)
+
+watch(
+  () => form.value.account_id,
+  () => {
+    if (isCartaoAccount.value && !form.value.monthly_budget) {
+      form.value.monthly_budget = firstDayOfMonth(props.selectedMonth ?? new Date())
+    }
+  }
 )
 
 function submitForm() {
@@ -130,6 +162,9 @@ function submitForm() {
     description: form.value.description,
     date: new Date(form.value.date).toISOString(),
     consolidated: form.value.consolidated,
+    monthly_budget: isCartaoAccount.value && form.value.monthly_budget
+      ? new Date(form.value.monthly_budget).toISOString()
+      : null,
   }
 
   emit('save', { id: props.model?.id, data: payload })

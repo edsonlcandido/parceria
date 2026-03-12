@@ -95,6 +95,7 @@
       :model="editingTransaction"
       :couple-id="coupleStore.id || ''"
       :accounts="accountsStore.accounts"
+      :selected-month="transactionsStore.selectedMonth"
       @close="closeDrawer"
       @save="saveTransaction"
     />
@@ -146,7 +147,14 @@ const totals = computed(() => {
     }
 
     if (isCartao && tx.consolidated) {
-      cartoes += type === 'expense' ? -amount : amount
+      const billingDateStr = (tx.monthly_budget || tx.date) as string
+      const billingDate = new Date(billingDateStr)
+      if (
+        billingDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
+        billingDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
+      ) {
+        cartoes += type === 'expense' ? -amount : amount
+      }
     }
 
     const monthDate = new Date(tx.date as string)

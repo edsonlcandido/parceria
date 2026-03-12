@@ -12,6 +12,7 @@ export interface TransactionPayload {
   type: 'income' | 'expense'
   date: string
   consolidated: boolean
+  monthly_budget?: string | null
 }
 
 function isSameMonth(dateString: string, baseDate: Date): boolean {
