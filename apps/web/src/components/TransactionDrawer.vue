@@ -76,7 +76,6 @@ import { computed, ref, watch } from 'vue'
 import type { RecordModel } from 'pocketbase'
 import type { TransactionPayload } from '../stores/transactions'
 import MonthPicker from './MonthPicker.vue'
-import { parseLocalDate } from '../utils/date'
 
 const props = defineProps<{
   open: boolean
