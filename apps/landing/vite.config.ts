@@ -61,6 +61,17 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5000,
     allowedHosts: true,
+    middlewares: [
+      (req, res, next) => {
+        if (req.url === '/') {
+          res.statusCode = 302
+          res.setHeader('Location', '/app/')
+          res.end()
+        } else {
+          next()
+        }
+      }
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8090',
