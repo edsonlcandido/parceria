@@ -62,6 +62,7 @@ const props = defineProps<{
   coupleId: string
   accounts: RecordModel[]
   model?: RecordModel | null
+  prefilledAccountId?: string
 }>()
 
 const emit = defineEmits<{
@@ -81,16 +82,27 @@ const form = ref({
 const editing = computed(() => !!props.model)
 
 watch(
-  () => props.model,
-  (value) => {
+  () => [props.model, props.open, props.prefilledAccountId] as const,
+  ([value]) => {
     if (!value) {
-      form.value = {
-        account_id: props.accounts[0]?.id || '',
-        type: 'expense',
-        amount: 0,
-        description: '',
-        date: new Date().toISOString().slice(0, 10),
-        consolidated: false,
+      if (props.prefilledAccountId) {
+        form.value = {
+          account_id: props.prefilledAccountId,
+          type: 'income',
+          amount: 0,
+          description: 'Saldo inicial',
+          date: new Date().toISOString().slice(0, 10),
+          consolidated: true,
+        }
+      } else {
+        form.value = {
+          account_id: props.accounts[0]?.id || '',
+          type: 'expense',
+          amount: 0,
+          description: '',
+          date: new Date().toISOString().slice(0, 10),
+          consolidated: false,
+        }
       }
       return
     }

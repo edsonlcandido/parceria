@@ -29,11 +29,6 @@
           </select>
         </label>
 
-        <label class="block" v-if="!editing">
-          <span class="mb-1 block text-sm font-semibold">Saldo Inicial</span>
-          <input v-model.number="form.initialBalance" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="number" step="0.01" />
-        </label>
-
         <button class="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-slate-800" type="submit">
           Salvar
         </button>
@@ -66,7 +61,6 @@ const form = ref({
   name: '',
   type: 'conta' as AccountType,
   user_id: null as string | null,
-  initialBalance: 0,
 })
 
 const editing = computed(() => !!props.model)
@@ -75,12 +69,7 @@ watch(
   () => props.model,
   (value) => {
     if (!value) {
-      form.value = {
-        name: '',
-        type: 'conta',
-        user_id: null,
-        initialBalance: 0,
-      }
+      form.value = { name: '', type: 'conta', user_id: null }
       return
     }
 
@@ -88,7 +77,6 @@ watch(
       name: (value.name as string) || '',
       type: (value.type as AccountType) || 'conta',
       user_id: (value.user_id as string) || null,
-      initialBalance: 0,
     }
   },
   { immediate: true }
@@ -102,7 +90,6 @@ function submitForm() {
       name: form.value.name,
       type: form.value.type,
       user_id: form.value.user_id,
-      initialBalance: Number(form.value.initialBalance || 0),
     },
   })
 }

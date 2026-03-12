@@ -88,6 +88,15 @@
       @close="closeDrawer"
       @save="saveAccount"
     />
+
+    <TransactionDrawer
+      :open="txDrawerOpen"
+      :couple-id="coupleStore.id || ''"
+      :accounts="accountsStore.accounts"
+      :prefilled-account-id="txPrefilledAccountId"
+      @close="closeTxDrawer"
+      @save="saveTransaction"
+    />
   </div>
 </template>
 
@@ -97,6 +106,7 @@ import { useRoute, useRouter } from 'vue-router'
 import type { RecordModel } from 'pocketbase'
 import AccountDrawer from '../components/AccountDrawer.vue'
 import AccountCard from '../components/AccountCard.vue'
+import TransactionDrawer from '../components/TransactionDrawer.vue'
 import { useAccountsStore } from '../stores/accounts'
 import { useTransactionsStore } from '../stores/transactions'
 import { useCoupleStore } from '../stores/couple'
@@ -109,6 +119,9 @@ const transactionsStore = useTransactionsStore()
 
 const drawerOpen = ref(false)
 const editingAccount = ref<RecordModel | null>(null)
+
+const txDrawerOpen = ref(false)
+const txPrefilledAccountId = ref<string | undefined>(undefined)
 
 type FilterType = 'all' | 'conta' | 'cartao'
 const selectedType = ref<FilterType>('all')
@@ -194,10 +207,29 @@ function closeDrawer() {
 async function saveAccount(payload: { id?: string; data: any }) {
   if (payload.id) {
     await accountsStore.updateAccount(payload.id, payload.data)
+    closeDrawer()
   } else {
-    await accountsStore.createAccount(payload.data)
+    const created = await accountsStore.createAccount(payload.data)
+    closeDrawer()
+    if (created) {
+      txPrefilledAccountId.value = created.id
+      txDrawerOpen.value = true
+    }
   }
-  closeDrawer()
+}
+
+function closeTxDrawer() {
+  txDrawerOpen.value = false
+  txPrefilledAccountId.value = undefined
+}
+
+async function saveTransaction(payload: { id?: string; data: any }) {
+  if (payload.id) {
+    await transactionsStore.updateTransaction(payload.id, payload.data)
+  } else {
+    await transactionsStore.createTransaction(payload.data)
+  }
+  closeTxDrawer()
 }
 
 async function removeAccount(id: string) {
