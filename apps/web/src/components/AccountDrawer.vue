@@ -55,6 +55,7 @@ const props = defineProps<{
   user1Id: string | null
   user2Id: string | null
   model?: RecordModel | null
+  defaultType?: AccountType
 }>()
 
 const emit = defineEmits<{
@@ -72,7 +73,7 @@ const form = ref({
 const editing = computed(() => !!props.model)
 
 function resetForm() {
-  form.value = { name: '', type: 'conta', user_id: null, initialBalance: 0 }
+  form.value = { name: '', type: props.defaultType ?? 'conta', user_id: null, initialBalance: 0 }
 }
 
 watch(

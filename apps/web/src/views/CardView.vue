@@ -2,6 +2,17 @@
   <div class="min-h-screen bg-[#e9edf4] pb-24">
     <main class="mx-auto max-w-2xl px-4 py-6">
 
+      <!-- Header -->
+      <div class="mb-6 flex items-center gap-3">
+        <h1 class="flex-1 text-2xl font-bold text-slate-900">Cartões</h1>
+        <button
+          class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white active:scale-95"
+          @click="openCreate"
+        >
+          + Novo cartão
+        </button>
+      </div>
+
       <!-- Navegador de mês -->
       <div class="mb-6">
         <MonthNavigator v-model="transactionsStore.selectedMonth" />
@@ -9,8 +20,9 @@
 
       <!-- Vazio -->
       <div v-if="cartaoAccounts.length === 0" class="rounded-3xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
+        <div class="mb-3 text-4xl">💳</div>
         <p class="font-semibold text-slate-900">Nenhum cartão cadastrado</p>
-        <p class="mt-1 text-sm text-slate-500">Adicione um cartão em Contas</p>
+        <p class="mt-1 text-sm text-slate-500">Clique em "+ Novo cartão" para adicionar</p>
       </div>
 
       <!-- Cards -->
@@ -37,25 +49,42 @@
             {{ formatCurrency(Math.abs(cardTotal(card.id))) }}
           </p>
         </article>
-
       </div>
     </main>
+
+    <AccountDrawer
+      :open="drawerOpen"
+      :model="editingAccount"
+      :couple-id="coupleStore.id || ''"
+      :partner1-name="coupleStore.partner1Name"
+      :partner2-name="coupleStore.partner2Name"
+      :user1-id="coupleStore.user1Id"
+      :user2-id="coupleStore.user2Id"
+      default-type="cartao"
+      @close="closeDrawer"
+      @save="saveAccount"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { RecordModel } from 'pocketbase'
 import MonthNavigator from '../components/MonthNavigator.vue'
+import AccountDrawer from '../components/AccountDrawer.vue'
 import { useCoupleStore } from '../stores/couple'
 import { useAccountsStore } from '../stores/accounts'
 import { useTransactionsStore } from '../stores/transactions'
+import type { AccountPayload } from '../stores/accounts'
 
 const route = useRoute()
 const coupleStore = useCoupleStore()
 const accountsStore = useAccountsStore()
 const transactionsStore = useTransactionsStore()
+
+const drawerOpen = ref(false)
+const editingAccount = ref<RecordModel | null>(null)
 
 onMounted(async () => {
   const token = typeof route.query.access_token === 'string'
@@ -94,7 +123,6 @@ function cardTotal(accountId: string): number {
     }, 0)
 }
 
-
 function ownerLabel(userId: string | null): string {
   if (!userId) return 'Casal'
   if (userId === coupleStore.user1Id) return coupleStore.partner1Name
@@ -104,5 +132,28 @@ function ownerLabel(userId: string | null): string {
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+}
+
+function openCreate() {
+  editingAccount.value = null
+  drawerOpen.value = true
+}
+
+function closeDrawer() {
+  drawerOpen.value = false
+  editingAccount.value = null
+}
+
+async function saveAccount(payload: { id?: string; data: AccountPayload }) {
+  const data = { ...payload.data, type: 'cartao' as const }
+  if (payload.id) {
+    await accountsStore.updateAccount(payload.id, data)
+  } else {
+    await accountsStore.createAccount(data)
+    if (coupleStore.id) {
+      await transactionsStore.fetchTransactions(coupleStore.id)
+    }
+  }
+  closeDrawer()
 }
 </script>
