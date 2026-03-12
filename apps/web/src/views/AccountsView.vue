@@ -1,70 +1,57 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-primary-50/30 pb-24">
+  <div class="min-h-screen bg-[#e9edf4] pb-24">
     <main class="mx-auto max-w-2xl px-4 py-6">
+
       <!-- Header -->
-      <div class="mb-10">
-        <div class="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
-          <div>
-            <h1 class="text-4xl font-bold text-slate-900">Contas e Cartões</h1>
-            <p class="mt-2 text-slate-600">Gerencie suas contas e cartões</p>
-          </div>
-          <button 
-            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:from-primary-700 hover:to-primary-800 active:scale-95 whitespace-nowrap"
-            @click="openCreate"
-          >
-            <span class="text-lg">+</span>
-            <span>Nova Conta</span>
-          </button>
+      <div class="mb-6 flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-slate-900">Contas</h1>
+          <p class="text-sm text-slate-500">{{ accountsStore.accounts.length }} conta{{ accountsStore.accounts.length !== 1 ? 's' : '' }} cadastrada{{ accountsStore.accounts.length !== 1 ? 's' : '' }}</p>
         </div>
+        <button
+          class="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white active:scale-95"
+          @click="openCreate"
+        >
+          + Nova conta
+        </button>
       </div>
 
-      <!-- Accounts Grid -->
-      <section class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <article 
-          v-for="account in accountsStore.accounts" 
-          :key="account.id" 
-          class="group relative overflow-hidden rounded-2xl border border-slate-200/50 bg-white p-6 shadow-md transition-all duration-300 hover:shadow-lg hover:border-primary-200"
-        >
-          <!-- Background gradient on hover -->
-          <div class="absolute inset-0 bg-gradient-to-br from-primary-50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"></div>
-          
-          <!-- Content -->
-          <div class="relative z-10">
-            <div class="mb-4 flex items-start justify-between gap-2">
-              <div class="flex-1">
-                <h3 class="text-xl font-bold text-slate-900">{{ account.name }}</h3>
-                <p class="mt-1 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                  <span class="inline-block h-2 w-2 rounded-full" :class="account.type === 'conta' ? 'bg-blue-500' : 'bg-purple-500'"></span>
-                  {{ account.type === 'conta' ? 'Conta Corrente' : 'Cartão' }}
-                </p>
-                <p class="mt-2 text-sm text-slate-600">{{ ownerLabel(account.user_id as string | null) }}</p>
-              </div>
-              <div class="text-3xl" :class="account.type === 'conta' ? '🏦' : '💳'"></div>
-            </div>
+      <!-- Empty state -->
+      <div v-if="accountsStore.accounts.length === 0" class="rounded-3xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
+        <div class="mb-3 text-4xl">🏦</div>
+        <p class="font-semibold text-slate-900">Nenhuma conta ainda</p>
+        <p class="mt-1 text-sm text-slate-500">Clique em "Nova conta" para começar</p>
+      </div>
 
-            <!-- Actions -->
-            <div class="mt-6 flex gap-2">
-              <button 
-                class="flex-1 rounded-lg border border-primary-300 bg-primary-50 px-3 py-2 text-sm font-semibold text-primary-700 transition-all duration-200 hover:bg-primary-100 active:scale-95"
-                @click="openEdit(account)"
-              >
-                Editar
-              </button>
-              <button 
-                class="flex-1 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition-all duration-200 hover:bg-rose-100 active:scale-95"
-                @click="removeAccount(account.id)"
-              >
-                Excluir
-              </button>
-            </div>
-          </div>
-        </article>
+      <!-- Contas correntes -->
+      <section v-if="contaAccounts.length > 0" class="mb-6">
+        <h2 class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Contas correntes</h2>
+        <div class="space-y-3">
+          <AccountCard
+            v-for="account in contaAccounts"
+            :key="account.id"
+            :account="account"
+            :balance="accountBalance(account.id)"
+            :owner-label="ownerLabel(account.user_id as string | null)"
+            @edit="openEdit(account)"
+            @delete="removeAccount(account.id)"
+          />
+        </div>
+      </section>
 
-        <!-- Empty State -->
-        <div v-if="accountsStore.accounts.length === 0" class="col-span-full rounded-2xl border-2 border-dashed border-slate-300 p-12 text-center">
-          <div class="text-4xl mb-3">📭</div>
-          <h3 class="text-lg font-semibold text-slate-900">Nenhuma conta criada</h3>
-          <p class="mt-2 text-slate-600">Clique em "Nova Conta" para adicionar sua primeira conta ou cartão</p>
+      <!-- Cartões -->
+      <section v-if="cartaoAccounts.length > 0">
+        <h2 class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Cartões de crédito</h2>
+        <div class="space-y-3">
+          <AccountCard
+            v-for="account in cartaoAccounts"
+            :key="account.id"
+            :account="account"
+            :balance="accountBalance(account.id)"
+            :owner-label="ownerLabel(account.user_id as string | null)"
+            @edit="openEdit(account)"
+            @delete="removeAccount(account.id)"
+          />
         </div>
       </section>
     </main>
@@ -84,31 +71,55 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import type { RecordModel } from 'pocketbase'
 import AccountDrawer from '../components/AccountDrawer.vue'
+import AccountCard from '../components/AccountCard.vue'
 import { useAccountsStore } from '../stores/accounts'
+import { useTransactionsStore } from '../stores/transactions'
 import { useCoupleStore } from '../stores/couple'
 
 const route = useRoute()
 const coupleStore = useCoupleStore()
 const accountsStore = useAccountsStore()
+const transactionsStore = useTransactionsStore()
 
 const drawerOpen = ref(false)
 const editingAccount = ref<RecordModel | null>(null)
 
 onMounted(async () => {
-  const token = typeof route.query.access_token === 'string' ? route.query.access_token : coupleStore.getStoredToken()
+  const token =
+    typeof route.query.access_token === 'string'
+      ? route.query.access_token
+      : coupleStore.getStoredToken()
   if (!token) return
 
   const loaded = await coupleStore.loadByToken(token)
   if (loaded && coupleStore.id) {
-    await accountsStore.fetchAccounts(coupleStore.id)
+    await Promise.all([
+      accountsStore.fetchAccounts(coupleStore.id),
+      transactionsStore.fetchTransactions(coupleStore.id),
+    ])
   }
 })
 
-function ownerLabel(userId: string | null) {
+const contaAccounts = computed(() =>
+  accountsStore.accounts.filter((a) => a.type === 'conta'),
+)
+const cartaoAccounts = computed(() =>
+  accountsStore.accounts.filter((a) => a.type === 'cartao'),
+)
+
+function accountBalance(accountId: string): number {
+  return transactionsStore.transactions
+    .filter((tx) => tx.account_id === accountId && tx.consolidated)
+    .reduce((sum, tx) => {
+      return tx.type === 'income' ? sum + (tx.amount as number) : sum - (tx.amount as number)
+    }, 0)
+}
+
+function ownerLabel(userId: string | null): string {
   if (!userId) return 'Casal'
   if (userId === coupleStore.user1Id) return coupleStore.partner1Name
   if (userId === coupleStore.user2Id) return coupleStore.partner2Name
@@ -136,11 +147,11 @@ async function saveAccount(payload: { id?: string; data: any }) {
   } else {
     await accountsStore.createAccount(payload.data)
   }
-
   closeDrawer()
 }
 
 async function removeAccount(id: string) {
+  if (!confirm('Excluir esta conta? As transações vinculadas não serão removidas.')) return
   await accountsStore.deleteAccount(id)
 }
 </script>
