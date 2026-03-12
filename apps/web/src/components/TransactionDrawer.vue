@@ -31,7 +31,7 @@
           <span class="mb-1 block text-sm font-semibold">Conta</span>
           <select v-model="form.account_id" class="w-full rounded-xl border border-slate-300 px-3 py-3" :required="!planned">
             <option value="">{{ planned ? 'Nenhuma (opcional)' : 'Selecione' }}</option>
-            <option v-for="account in accounts" :key="account.id" :value="account.id">{{ account.name }}</option>
+            <option v-for="account in accounts" :key="account.id" :value="account.id">{{ accountLabel(account) }}</option>
           </select>
         </label>
 
@@ -85,12 +85,29 @@ const props = defineProps<{
   model?: RecordModel | null
   prefilledAccountId?: string
   selectedMonth?: Date
+  partner1Name?: string
+  partner2Name?: string
+  user1Id?: string | null
+  user2Id?: string | null
 }>()
 
 const emit = defineEmits<{
   (e: 'close'): void
   (e: 'save', payload: { id?: string; data: TransactionPayload }): void
 }>()
+
+function ownerName(userId: string | null | undefined): string {
+  if (!userId) return 'Casal'
+  if (userId === props.user1Id) return props.partner1Name || ''
+  if (userId === props.user2Id) return props.partner2Name || ''
+  return ''
+}
+
+function accountLabel(account: RecordModel): string {
+  const name = account.name as string
+  const owner = ownerName(account.user_id as string | null)
+  return owner ? `${name} - ${owner}` : name
+}
 
 function firstDayOfMonth(date: Date): string {
   const d = new Date(date.getFullYear(), date.getMonth(), 1)
