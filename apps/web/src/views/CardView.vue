@@ -38,13 +38,6 @@
           </p>
         </article>
 
-        <!-- Total geral -->
-        <div class="mt-4 flex items-center justify-between rounded-2xl bg-slate-900 px-4 py-3.5">
-          <span class="text-sm font-semibold text-white/70">Total da fatura</span>
-          <span class="text-sm font-bold" :class="grandTotal <= 0 ? 'text-rose-400' : 'text-white'">
-            {{ formatCurrency(Math.abs(grandTotal)) }}
-          </span>
-        </div>
       </div>
     </main>
   </div>
@@ -101,9 +94,6 @@ function cardTotal(accountId: string): number {
     }, 0)
 }
 
-const grandTotal = computed(() =>
-  cartaoAccounts.value.reduce((sum, card) => sum + cardTotal(card.id), 0)
-)
 
 function ownerLabel(userId: string | null): string {
   if (!userId) return 'Casal'
