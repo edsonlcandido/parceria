@@ -13,6 +13,24 @@ const buildVersion = [
   String(now.getSeconds()).padStart(2, '0')
 ].join('')
 
+// Plugin para redirecionar / -> /app/
+function redirectRootPlugin() {
+  return {
+    name: 'redirect-root',
+    configureServer(server: any) {
+      server.middlewares.use((req: any, res: any, next: any) => {
+        if (req.url === '/' || req.url === '') {
+          res.statusCode = 302
+          res.setHeader('Location', '/app/')
+          res.end()
+        } else {
+          next()
+        }
+      })
+    }
+  }
+}
+
 // Plugin para adicionar ?v=timestamp nos assets do HTML
 function versionQueryPlugin() {
   return {
@@ -28,7 +46,7 @@ function versionQueryPlugin() {
 }
 
 export default defineConfig({
-  plugins: [versionQueryPlugin()],
+  plugins: [redirectRootPlugin(), versionQueryPlugin()],
   build: {
     rollupOptions: {
       input: {
@@ -61,17 +79,6 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5000,
     allowedHosts: true,
-    middlewares: [
-      (req, res, next) => {
-        if (req.url === '/') {
-          res.statusCode = 302
-          res.setHeader('Location', '/app/')
-          res.end()
-        } else {
-          next()
-        }
-      }
-    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8090',
