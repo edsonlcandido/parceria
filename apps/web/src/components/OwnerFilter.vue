@@ -5,7 +5,7 @@
       :key="option.value"
       class="inline-flex items-center gap-2 rounded-lg border-2 px-5 py-2.5 text-sm font-semibold transition-all duration-200"
       :class="option.value === modelValue 
-        ? 'border-primary-600 bg-primary-50 text-primary-700 shadow-md' 
+        ? 'border-slate-900 bg-slate-900 text-white shadow-md' 
         : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'"
       @click="emit('update:modelValue', option.value)"
     >

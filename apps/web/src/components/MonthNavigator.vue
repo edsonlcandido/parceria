@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-2xl bg-gradient-to-r from-primary-500 via-primary-600 to-primary-700 px-6 py-5 shadow-lg">
+  <div class="rounded-2xl bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 px-6 py-5 shadow-lg">
     <div class="flex items-center justify-between">
       <button
         class="rounded-lg p-2 text-white/80 transition-all duration-200 hover:bg-white/20 active:scale-95"

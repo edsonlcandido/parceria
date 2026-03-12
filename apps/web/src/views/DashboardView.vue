@@ -44,10 +44,10 @@
         <div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <h2 class="text-3xl font-bold text-slate-900">Lançamentos</h2>
           <button 
-            class="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl hover:from-primary-700 hover:to-primary-800 active:scale-95"
+            class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-slate-800 active:scale-95"
             @click="openCreateDrawer"
           >
-            <span class="text-lg">+</span>
+            <span class="text-base">+</span>
             <span>Novo Lançamento</span>
           </button>
         </div>
