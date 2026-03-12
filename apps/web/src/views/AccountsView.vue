@@ -164,11 +164,14 @@ function setFilter(type: FilterType) {
 
 const balanceByAccount = computed(() => {
   const map: Record<string, number> = {}
+  console.log('[AccountsView] transactions total:', transactionsStore.transactions.length, transactionsStore.transactions.map(t => ({ id: t.id, account_id: t.account_id, amount: t.amount, type: t.type, consolidated: t.consolidated })))
   for (const tx of transactionsStore.transactions) {
+    if (!tx.consolidated) continue
     const id = tx.account_id as string
     if (!(id in map)) map[id] = 0
-    map[id] += tx.type === 'income' ? (tx.amount as number) : -(tx.amount as number)
+    map[id] += tx.type === 'income' ? parseFloat(tx.amount) : -parseFloat(tx.amount)
   }
+  console.log('[AccountsView] balanceByAccount:', map)
   return map
 })
 
