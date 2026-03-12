@@ -15,14 +15,6 @@
           </select>
         </label>
 
-        <label class="block">
-          <span class="mb-1 block text-sm font-semibold">Responsável</span>
-          <select v-model="form.user_id" class="w-full rounded-xl border border-slate-300 px-3 py-3">
-            <option :value="null">Casal</option>
-            <option v-if="user1Id" :value="user1Id">{{ partner1Name }}</option>
-            <option v-if="user2Id" :value="user2Id">{{ partner2Name }}</option>
-          </select>
-        </label>
 
         <label class="block">
           <span class="mb-1 block text-sm font-semibold">Tipo</span>
@@ -69,10 +61,6 @@ const props = defineProps<{
   open: boolean
   coupleId: string
   accounts: RecordModel[]
-  partner1Name: string
-  partner2Name: string
-  user1Id: string | null
-  user2Id: string | null
   model?: RecordModel | null
 }>()
 
@@ -83,7 +71,6 @@ const emit = defineEmits<{
 
 const form = ref({
   account_id: '',
-  user_id: null as string | null,
   type: 'expense' as 'income' | 'expense',
   amount: 0,
   description: '',
@@ -99,7 +86,6 @@ watch(
     if (!value) {
       form.value = {
         account_id: props.accounts[0]?.id || '',
-        user_id: null,
         type: 'expense',
         amount: 0,
         description: '',
@@ -111,7 +97,6 @@ watch(
 
     form.value = {
       account_id: (value.account_id as string) || '',
-      user_id: (value.user_id as string) || null,
       type: (value.type as 'income' | 'expense') || 'expense',
       amount: (value.amount as number) || 0,
       description: (value.description as string) || '',
@@ -123,10 +108,11 @@ watch(
 )
 
 function submitForm() {
+  const selectedAccount = props.accounts.find((acc) => acc.id === form.value.account_id)
   const payload: TransactionPayload = {
     couple_id: props.coupleId,
     account_id: form.value.account_id,
-    user_id: form.value.user_id,
+    user_id: selectedAccount?.user_id || null,
     type: form.value.type,
     amount: Number(form.value.amount),
     description: form.value.description,

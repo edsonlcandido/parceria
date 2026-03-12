@@ -72,10 +72,6 @@
       :model="editingTransaction"
       :couple-id="coupleStore.id || ''"
       :accounts="accountsStore.accounts"
-      :partner1-name="coupleStore.partner1Name"
-      :partner2-name="coupleStore.partner2Name"
-      :user1-id="coupleStore.user1Id"
-      :user2-id="coupleStore.user2Id"
       @close="closeDrawer"
       @save="saveTransaction"
     />
