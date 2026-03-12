@@ -22,8 +22,25 @@ export const useCoupleStore = defineStore('couple', () => {
   const accessToken = ref<string>('')
   const partner1Name = ref('Usuário 1')
   const partner2Name = ref('Usuário 2')
+  const user1Id = ref<string | null>(null)
+  const user2Id = ref<string | null>(null)
 
   const isReady = computed(() => !!id.value && !!accessToken.value)
+
+  async function loadUsers(coupleId: string) {
+    const users = await pb.collection('users').getFullList({
+      filter: `couple_id = "${safeFilterValue(coupleId)}"`,
+      sort: 'created',
+    })
+    if (users.length >= 1) {
+      user1Id.value = users[0].id
+      partner1Name.value = (users[0].name as string) || 'Usuário 1'
+    }
+    if (users.length >= 2) {
+      user2Id.value = users[1].id
+      partner2Name.value = (users[1].name as string) || 'Usuário 2'
+    }
+  }
 
   async function loadByToken(token: string): Promise<boolean> {
     if (!token) return false
@@ -39,6 +56,9 @@ export const useCoupleStore = defineStore('couple', () => {
       partner1Name.value = (record.partner1_name as string) || 'Usuário 1'
       partner2Name.value = (record.partner2_name as string) || 'Usuário 2'
       localStorage.setItem(ACCESS_TOKEN_KEY, token)
+
+      await loadUsers(record.id)
+
       return true
     } catch {
       return false
@@ -61,6 +81,24 @@ export const useCoupleStore = defineStore('couple', () => {
     partner2Name.value = (created.partner2_name as string) || 'Usuário 2'
     localStorage.setItem(ACCESS_TOKEN_KEY, token)
 
+    const pwd1 = generateToken(16)
+    const u1 = await pb.collection('users').create({
+      name: 'Usuário 1',
+      couple_id: created.id,
+      password: pwd1,
+      passwordConfirm: pwd1,
+    })
+    user1Id.value = u1.id
+
+    const pwd2 = generateToken(16)
+    const u2 = await pb.collection('users').create({
+      name: 'Usuário 2',
+      couple_id: created.id,
+      password: pwd2,
+      passwordConfirm: pwd2,
+    })
+    user2Id.value = u2.id
+
     return token
   }
 
@@ -74,6 +112,8 @@ export const useCoupleStore = defineStore('couple', () => {
     accessToken.value = ''
     partner1Name.value = 'Usuário 1'
     partner2Name.value = 'Usuário 2'
+    user1Id.value = null
+    user2Id.value = null
     localStorage.removeItem(ACCESS_TOKEN_KEY)
   }
 
@@ -83,6 +123,8 @@ export const useCoupleStore = defineStore('couple', () => {
     accessToken,
     partner1Name,
     partner2Name,
+    user1Id,
+    user2Id,
     isReady,
     loadByToken,
     initCouple,
