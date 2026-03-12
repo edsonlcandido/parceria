@@ -131,6 +131,8 @@ const totals = computed(() => {
   let despesas = 0
   let receitasConsolidadas = 0
   let despesasConsolidadas = 0
+  let receitasTodas = 0
+  let despesasTodas = 0
 
   for (const tx of transactionsStore.byOwner) {
     const type = tx.type as 'income' | 'expense'
@@ -148,17 +150,22 @@ const totals = computed(() => {
     }
 
     const monthDate = new Date(tx.date as string)
-    if (
-      !isCartao &&
+    const isCurrentMonth =
       monthDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
       monthDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
-    ) {
-      if (type === 'income') receitas += amount
-      else despesas += amount
 
-      if (tx.consolidated) {
-        if (type === 'income') receitasConsolidadas += amount
-        else despesasConsolidadas += amount
+    if (isCurrentMonth) {
+      if (type === 'income') receitasTodas += amount
+      else despesasTodas += amount
+
+      if (!isCartao) {
+        if (type === 'income') receitas += amount
+        else despesas += amount
+
+        if (tx.consolidated) {
+          if (type === 'income') receitasConsolidadas += amount
+          else despesasConsolidadas += amount
+        }
       }
     }
   }
@@ -169,7 +176,7 @@ const totals = computed(() => {
     receitas,
     despesas,
     saldoMes: receitasConsolidadas - despesasConsolidadas,
-    saldoPrevisto: receitas - despesas,
+    saldoPrevisto: receitasTodas - despesasTodas,
   }
 })
 
