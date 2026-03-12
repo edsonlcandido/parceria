@@ -47,18 +47,23 @@ export const useTransactionsStore = defineStore('transactions', () => {
     transactions.value = result
   }
 
+  function sortByDate(list: typeof transactions.value) {
+    return [...list].sort((a, b) => {
+      return new Date(b.date as string).getTime() - new Date(a.date as string).getTime()
+    })
+  }
+
   async function createTransaction(payload: TransactionPayload) {
     const created = await pb.collection('transactions').create(payload)
-    transactions.value = [created, ...transactions.value]
+    transactions.value = sortByDate([created, ...transactions.value])
     return created
   }
 
   async function updateTransaction(id: string, payload: Partial<TransactionPayload>) {
     const updated = await pb.collection('transactions').update(id, payload)
     const index = transactions.value.findIndex((tx) => tx.id === id)
-
     if (index >= 0) transactions.value[index] = updated
-
+    transactions.value = sortByDate(transactions.value)
     return updated
   }
 

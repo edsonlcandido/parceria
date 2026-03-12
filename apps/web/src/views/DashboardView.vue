@@ -139,11 +139,11 @@ const totals = computed(() => {
     const isConta = account?.type === 'conta'
     const isCartao = account?.type === 'cartao'
 
-    if (isConta) {
+    if (isConta && tx.consolidated) {
       contas += type === 'income' ? amount : -amount
     }
 
-    if (isCartao) {
+    if (isCartao && tx.consolidated) {
       cartoes += type === 'expense' ? -amount : amount
     }
 
