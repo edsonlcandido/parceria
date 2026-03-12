@@ -4,7 +4,7 @@
 
       <RouterLink
         :to="tokenRoute('/dashboard')"
-        class="flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors"
+        class="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors"
         :class="isActive('/dashboard') ? 'text-slate-900' : 'text-slate-400'"
       >
         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -15,7 +15,7 @@
 
       <RouterLink
         :to="tokenRoute('/contas')"
-        class="flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors"
+        class="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors"
         :class="isActive('/contas') ? 'text-slate-900' : 'text-slate-400'"
       >
         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -25,8 +25,21 @@
       </RouterLink>
 
       <RouterLink
+        :to="tokenRoute('/cartao')"
+        class="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors"
+        :class="isActive('/cartao') ? 'text-slate-900' : 'text-slate-400'"
+      >
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <rect x="2" y="5" width="20" height="14" rx="2" />
+          <path stroke-linecap="round" d="M2 10h20" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 15h4" />
+        </svg>
+        <span class="text-[10px] font-semibold">Cartões</span>
+      </RouterLink>
+
+      <RouterLink
         :to="tokenRoute('/configuracoes')"
-        class="flex flex-col items-center gap-1 px-4 py-2 rounded-xl transition-colors"
+        class="flex flex-col items-center gap-1 px-3 py-2 rounded-xl transition-colors"
         :class="isActive('/configuracoes') ? 'text-slate-900' : 'text-slate-400'"
       >
         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">

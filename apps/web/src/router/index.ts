@@ -3,6 +3,7 @@ import { useCoupleStore } from '../stores/couple'
 import OnboardingView from '../views/OnboardingView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import AccountsView from '../views/AccountsView.vue'
+import CardView from '../views/CardView.vue'
 import SettingsView from '../views/SettingsView.vue'
 
 const router = createRouter({
@@ -23,6 +24,12 @@ const router = createRouter({
       path: '/contas',
       name: 'accounts',
       component: AccountsView,
+      meta: { requiresToken: true },
+    },
+    {
+      path: '/cartao',
+      name: 'cards',
+      component: CardView,
       meta: { requiresToken: true },
     },
     {

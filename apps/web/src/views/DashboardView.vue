@@ -42,7 +42,7 @@
           type="cartao"
           :value="totals.cartoes"
           class="cursor-pointer"
-          @click="router.push({ name: 'accounts', query: { ...route.query, filter: 'cartao' } })"
+          @click="router.push({ name: 'cards', query: route.query })"
         />
         <SummaryCard label="Receitas" type="income" :value="totals.receitas" />
         <SummaryCard label="Despesas" type="expense" :value="totals.despesas" />
