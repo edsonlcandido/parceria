@@ -27,10 +27,10 @@
       </div>
 
       <form class="space-y-4" @submit.prevent="submitForm">
-        <label v-if="!planned" class="block">
+        <label class="block">
           <span class="mb-1 block text-sm font-semibold">Conta</span>
           <select v-model="form.account_id" class="w-full rounded-xl border border-slate-300 px-3 py-3" :required="!planned">
-            <option value="" disabled>Selecione</option>
+            <option value="">{{ planned ? 'Nenhuma (opcional)' : 'Selecione' }}</option>
             <option v-for="account in accounts" :key="account.id" :value="account.id">{{ account.name }}</option>
           </select>
         </label>
@@ -58,10 +58,10 @@
           <input v-model="form.date" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" required />
         </label>
 
-        <label v-if="!planned && isCartaoAccount" class="block">
+        <label class="block">
           <span class="mb-1 block text-sm font-semibold">Mês da Fatura</span>
           <input v-model="form.monthly_budget" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" />
-          <p class="mt-1 text-xs text-slate-400">Primeiro dia do mês de referência da fatura</p>
+          <p class="mt-1 text-xs text-slate-400">Primeiro dia do mês de referência</p>
         </label>
 
         <button class="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-slate-800" type="submit">
@@ -173,20 +173,18 @@ watch(
 )
 
 function submitForm() {
-  const selectedAccount = planned.value
-    ? null
-    : props.accounts.find((acc) => acc.id === form.value.account_id)
+  const selectedAccount = props.accounts.find((acc) => acc.id === form.value.account_id)
 
   const payload: TransactionPayload = {
     couple_id: props.coupleId,
-    account_id: planned.value ? null : form.value.account_id,
+    account_id: form.value.account_id || null,
     user_id: selectedAccount?.user_id || null,
     type: form.value.type,
     amount: Number(form.value.amount),
     description: form.value.description,
     date: new Date(form.value.date).toISOString(),
     consolidated: !planned.value,
-    monthly_budget: !planned.value && isCartaoAccount.value && form.value.monthly_budget
+    monthly_budget: form.value.monthly_budget
       ? new Date(form.value.monthly_budget).toISOString()
       : null,
   }
