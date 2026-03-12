@@ -58,11 +58,10 @@
           <input v-model="form.date" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" required />
         </label>
 
-        <label class="block">
+        <div class="block">
           <span class="mb-1 block text-sm font-semibold">Mês da Fatura</span>
-          <input v-model="form.monthly_budget" class="w-full rounded-xl border border-slate-300 px-3 py-3" type="date" />
-          <p class="mt-1 text-xs text-slate-400">Primeiro dia do mês de referência</p>
-        </label>
+          <MonthPicker v-model="form.monthly_budget" />
+        </div>
 
         <button class="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white hover:bg-slate-800" type="submit">
           Salvar
@@ -76,6 +75,7 @@
 import { computed, ref, watch } from 'vue'
 import type { RecordModel } from 'pocketbase'
 import type { TransactionPayload } from '../stores/transactions'
+import MonthPicker from './MonthPicker.vue'
 
 const props = defineProps<{
   open: boolean

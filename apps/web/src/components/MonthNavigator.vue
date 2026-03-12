@@ -32,12 +32,11 @@ import { CalendarDaysIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/
 const props = defineProps<{ modelValue: Date }>()
 const emit = defineEmits<{ (e: 'update:modelValue', value: Date): void }>()
 
-const monthLabel = computed(() =>
-  props.modelValue.toLocaleDateString('pt-BR', {
-    month: 'long',
-    year: 'numeric',
-  }).replace(/^./, (letter) => letter.toUpperCase())
-)
+const monthLabel = computed(() => {
+  const month = props.modelValue.toLocaleDateString('pt-BR', { month: 'long' })
+  const year = String(props.modelValue.getFullYear()).slice(2)
+  return `${month.charAt(0).toUpperCase() + month.slice(1)}/${year}`
+})
 
 function moveMonth(step: number) {
   const value = new Date(props.modelValue)
