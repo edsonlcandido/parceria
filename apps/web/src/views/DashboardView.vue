@@ -24,12 +24,19 @@
       </section>
 
       <!-- Balance Section -->
-      <section class="mb-10 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-8 shadow-xl text-white">
-        <p class="text-sm font-semibold uppercase tracking-wide text-slate-400">Saldo do Mês</p>
-        <p class="mt-2 text-5xl font-bold" :class="totals.saldoMes >= 0 ? 'text-emerald-400' : 'text-rose-400'">
-          {{ formatCurrency(totals.saldoMes) }}
-        </p>
-        <div class="mt-4 h-1 w-20 bg-gradient-to-r" :class="totals.saldoMes >= 0 ? 'from-emerald-400 to-green-500' : 'from-rose-400 to-red-500'"></div>
+      <section class="mb-10 space-y-1 text-right">
+        <div>
+          <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Saldo do Mês</span>
+          <p class="text-lg font-bold" :class="totals.saldoMes >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+            {{ formatCurrency(totals.saldoMes) }}
+          </p>
+        </div>
+        <div>
+          <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Saldo Previsto</span>
+          <p class="text-sm font-semibold" :class="totals.saldoPrevisto >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+            {{ formatCurrency(totals.saldoPrevisto) }}
+          </p>
+        </div>
       </section>
 
       <!-- Transactions Section -->
@@ -96,6 +103,8 @@ const totals = computed(() => {
   let cartoes = 0
   let receitas = 0
   let despesas = 0
+  let receitasConsolidadas = 0
+  let despesasConsolidadas = 0
 
   for (const tx of transactionsStore.byOwner) {
     const type = tx.type as 'income' | 'expense'
@@ -119,6 +128,11 @@ const totals = computed(() => {
     ) {
       if (type === 'income') receitas += amount
       else despesas += amount
+
+      if (tx.consolidated) {
+        if (type === 'income') receitasConsolidadas += amount
+        else despesasConsolidadas += amount
+      }
     }
   }
 
@@ -127,7 +141,8 @@ const totals = computed(() => {
     cartoes,
     receitas,
     despesas,
-    saldoMes: receitas - despesas,
+    saldoMes: receitasConsolidadas - despesasConsolidadas,
+    saldoPrevisto: receitas - despesas,
   }
 })
 
