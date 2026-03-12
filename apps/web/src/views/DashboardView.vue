@@ -158,15 +158,15 @@ const totals = computed(() => {
       }
     }
 
-    const monthDate = parseLocalDate(tx.date as string)
+    const refDateStr = isCartao
+      ? ((tx.monthly_budget || tx.date) as string)
+      : (tx.date as string)
+    const refDate = parseLocalDate(refDateStr)
     const isCurrentMonth =
-      monthDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
-      monthDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
+      refDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
+      refDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
 
     if (isCurrentMonth) {
-      if (type === 'income') receitasTodas += amount
-      else despesasTodas += amount
-
       if (!isCartao) {
         if (type === 'income') receitas += amount
         else despesas += amount
@@ -176,6 +176,9 @@ const totals = computed(() => {
           else despesasConsolidadas += amount
         }
       }
+
+      if (type === 'income') receitasTodas += amount
+      else despesasTodas += amount
     }
   }
 

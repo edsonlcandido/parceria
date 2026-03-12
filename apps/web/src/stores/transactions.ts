@@ -27,7 +27,10 @@ export const useTransactionsStore = defineStore('transactions', () => {
   })
 
   const monthTransactions = computed(() => {
-    return byOwner.value.filter((tx) => isSameMonth(tx.date as string, selectedMonth.value))
+    return byOwner.value.filter((tx) => {
+      const refDate = (tx.monthly_budget || tx.date) as string
+      return isSameMonth(refDate, selectedMonth.value)
+    })
   })
 
   async function fetchTransactions(coupleId: string) {
