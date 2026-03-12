@@ -197,6 +197,9 @@ async function saveAccount(payload: { id?: string; data: any }) {
     await accountsStore.updateAccount(payload.id, payload.data)
   } else {
     await accountsStore.createAccount(payload.data)
+    if (coupleStore.id) {
+      await transactionsStore.fetchTransactions(coupleStore.id)
+    }
   }
   closeDrawer()
 }
