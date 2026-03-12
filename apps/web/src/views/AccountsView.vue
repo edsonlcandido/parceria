@@ -52,7 +52,7 @@
             v-for="account in contaAccounts"
             :key="account.id"
             :account="account"
-            :balance="accountBalance(account.id)"
+            :balance="balanceByAccount[account.id] ?? 0"
             :owner-label="ownerLabel(account.user_id as string | null)"
             @edit="openEdit(account)"
             @delete="removeAccount(account.id)"
@@ -68,7 +68,7 @@
             v-for="account in cartaoAccounts"
             :key="account.id"
             :account="account"
-            :balance="accountBalance(account.id)"
+            :balance="balanceByAccount[account.id] ?? 0"
             :owner-label="ownerLabel(account.user_id as string | null)"
             @edit="openEdit(account)"
             @delete="removeAccount(account.id)"
@@ -162,13 +162,15 @@ function setFilter(type: FilterType) {
   router.replace({ query: { ...route.query, filter: type === 'all' ? undefined : type } })
 }
 
-function accountBalance(accountId: string): number {
-  return transactionsStore.transactions
-    .filter((tx) => tx.account_id === accountId && tx.consolidated)
-    .reduce((sum, tx) => {
-      return tx.type === 'income' ? sum + (tx.amount as number) : sum - (tx.amount as number)
-    }, 0)
-}
+const balanceByAccount = computed(() => {
+  const map: Record<string, number> = {}
+  for (const tx of transactionsStore.transactions) {
+    const id = tx.account_id as string
+    if (!(id in map)) map[id] = 0
+    map[id] += tx.type === 'income' ? (tx.amount as number) : -(tx.amount as number)
+  }
+  return map
+})
 
 function ownerLabel(userId: string | null): string {
   if (!userId) return 'Casal'
