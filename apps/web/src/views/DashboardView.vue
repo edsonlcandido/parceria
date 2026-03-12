@@ -30,8 +30,20 @@
 
       <!-- Summary Cards -->
       <section class="mb-10 flex flex-col gap-3">
-        <SummaryCard label="Contas" type="conta" :value="totals.contas" />
-        <SummaryCard label="Cartões" type="cartao" :value="totals.cartoes" />
+        <SummaryCard
+          label="Contas"
+          type="conta"
+          :value="totals.contas"
+          class="cursor-pointer"
+          @click="router.push({ name: 'accounts', query: { ...route.query, filter: 'conta' } })"
+        />
+        <SummaryCard
+          label="Cartões"
+          type="cartao"
+          :value="totals.cartoes"
+          class="cursor-pointer"
+          @click="router.push({ name: 'accounts', query: { ...route.query, filter: 'cartao' } })"
+        />
         <SummaryCard label="Receitas" type="income" :value="totals.receitas" />
         <SummaryCard label="Despesas" type="expense" :value="totals.despesas" />
       </section>
