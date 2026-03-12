@@ -21,57 +21,23 @@
         </button>
       </div>
 
-      <!-- Filter tabs -->
-      <div class="mb-5 flex gap-2">
-        <button
-          v-for="tab in tabs"
-          :key="tab.value"
-          class="rounded-xl border-2 px-4 py-2 text-sm font-semibold transition-all active:scale-95"
-          :class="selectedType === tab.value
-            ? 'border-slate-900 bg-slate-900 text-white'
-            : 'border-slate-200 bg-white text-slate-600'"
-          @click="setFilter(tab.value)"
-        >
-          {{ tab.label }}
-          <span class="ml-1 text-xs opacity-60">({{ tab.count }})</span>
-        </button>
-      </div>
-
       <!-- Empty state -->
-      <div v-if="visibleAccounts.length === 0" class="rounded-3xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
+      <div v-if="contaAccounts.length === 0" class="rounded-3xl border-2 border-dashed border-slate-300 bg-white p-12 text-center">
         <div class="mb-3 text-4xl">🏦</div>
         <p class="font-semibold text-slate-900">Nenhuma conta aqui</p>
         <p class="mt-1 text-sm text-slate-500">Clique em "+ Nova conta" para adicionar</p>
       </div>
 
-      <!-- Contas correntes -->
-      <section v-if="showContas && contaAccounts.length > 0" class="mb-6">
-        <h2 class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Contas</h2>
-        <div class="space-y-2">
-          <AccountCard
-            v-for="account in contaAccounts"
-            :key="account.id"
-            :account="account"
-            :balance="balanceByAccount[account.id] ?? 0"
-            :owner-label="ownerLabel(account.user_id as string | null)"
-            @select="openActions(account)"
-          />
-        </div>
-      </section>
-
-      <!-- Cartões -->
-      <section v-if="showCartoes && cartaoAccounts.length > 0">
-        <h2 class="mb-3 text-xs font-bold uppercase tracking-widest text-slate-400">Cartões de crédito</h2>
-        <div class="space-y-2">
-          <AccountCard
-            v-for="account in cartaoAccounts"
-            :key="account.id"
-            :account="account"
-            :balance="balanceByAccount[account.id] ?? 0"
-            :owner-label="ownerLabel(account.user_id as string | null)"
-            @select="openActions(account)"
-          />
-        </div>
+      <!-- Contas -->
+      <section v-else class="space-y-2">
+        <AccountCard
+          v-for="account in contaAccounts"
+          :key="account.id"
+          :account="account"
+          :balance="balanceByAccount[account.id] ?? 0"
+          :owner-label="ownerLabel(account.user_id as string | null)"
+          @select="openActions(account)"
+        />
       </section>
     </main>
 
@@ -81,7 +47,7 @@
         <div class="mb-6 flex items-center justify-between">
           <div>
             <h3 class="text-2xl font-bold text-slate-900">{{ actionsAccount.name }}</h3>
-            <p class="mt-0.5 text-sm text-slate-500">{{ actionsAccount.type === 'conta' ? 'Conta corrente' : 'Cartão de crédito' }}</p>
+            <p class="mt-0.5 text-sm text-slate-500">Conta corrente</p>
           </div>
           <button class="rounded-lg bg-slate-100 px-3 py-2 text-sm font-semibold" @click="actionsAccount = null">Fechar</button>
         </div>
@@ -145,15 +111,7 @@ const drawerOpen = ref(false)
 const editingAccount = ref<RecordModel | null>(null)
 const actionsAccount = ref<RecordModel | null>(null)
 
-type FilterType = 'all' | 'conta' | 'cartao'
-const selectedType = ref<FilterType>('all')
-
 onMounted(async () => {
-  const filterParam = route.query.filter as string | undefined
-  if (filterParam === 'conta' || filterParam === 'cartao') {
-    selectedType.value = filterParam
-  }
-
   const token =
     typeof route.query.access_token === 'string'
       ? route.query.access_token
@@ -172,29 +130,6 @@ onMounted(async () => {
 const contaAccounts = computed(() =>
   accountsStore.accounts.filter((a) => a.type === 'conta'),
 )
-const cartaoAccounts = computed(() =>
-  accountsStore.accounts.filter((a) => a.type === 'cartao'),
-)
-
-const showContas = computed(() => selectedType.value === 'all' || selectedType.value === 'conta')
-const showCartoes = computed(() => selectedType.value === 'all' || selectedType.value === 'cartao')
-
-const visibleAccounts = computed(() => {
-  if (selectedType.value === 'conta') return contaAccounts.value
-  if (selectedType.value === 'cartao') return cartaoAccounts.value
-  return accountsStore.accounts
-})
-
-const tabs = computed(() => [
-  { value: 'all' as FilterType, label: 'Todos', count: accountsStore.accounts.length },
-  { value: 'conta' as FilterType, label: 'Contas', count: contaAccounts.value.length },
-  { value: 'cartao' as FilterType, label: 'Cartões', count: cartaoAccounts.value.length },
-])
-
-function setFilter(type: FilterType) {
-  selectedType.value = type
-  router.replace({ query: { ...route.query, filter: type === 'all' ? undefined : type } })
-}
 
 const balanceByAccount = computed(() => {
   const map: Record<string, number> = {}
