@@ -1,7 +1,7 @@
 <template>
   <div class="flex min-h-screen items-center justify-center bg-[#e9edf4] px-4">
     <section class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-lg">
-      <h1 class="text-3xl font-bold text-slate-900">Parceria Finance</h1>
+      <h1 class="text-3xl font-bold text-slate-900">Parceria financeira</h1>
       <p class="mt-2 text-slate-600">Crie seu espaço financeiro compartilhado e receba um link seguro de acesso.</p>
 
       <button
