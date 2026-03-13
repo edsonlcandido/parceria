@@ -1,247 +1,243 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50">
-    <!-- Navigation -->
-    <nav class="bg-white/80 backdrop-blur-lg shadow-lg sticky top-0 z-50 border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-          <div class="flex items-center">
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Dashboard
-            </h1>
-          </div>
-          <div class="flex items-center gap-4">
-            <div class="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 rounded-full">
-              <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
-                <UserCircleIcon class="h-5 w-5 text-white" />
-              </div>
-              <span class="text-sm font-semibold text-gray-700">{{ userName }}</span>
-            </div>
-            <button
-              @click="handleLogout"
-              class="group inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all transform hover:scale-105 shadow-lg"
-            >
-              <ArrowRightOnRectangleIcon class="h-5 w-5 mr-2 group-hover:translate-x-1 transition-transform" />
-              Sair
-            </button>
-          </div>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto py-8 sm:px-6 lg:px-8">
-      <!-- Welcome Section -->
-      <div class="px-4 py-6 sm:px-0">
-        <div class="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 overflow-hidden shadow-2xl rounded-2xl transform hover:scale-[1.02] transition-all">
-          <div class="p-8 text-white">
-            <div class="flex items-center justify-between">
-              <div>
-                <h2 class="text-3xl md:text-4xl font-bold mb-3">
-                  Olá, {{ userName }}! 👋
-                </h2>
-                <p class="text-blue-100 text-lg">
-                  Seja bem-vindo de volta ao seu painel de controle
-                </p>
-              </div>
-              <div class="hidden md:block">
-                <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center">
-                  <span class="text-6xl">🎉</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  <div class="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-primary-50/30 pb-24">
+    <main class="mx-auto max-w-2xl px-4 py-6">
+      <!-- Header with Month Navigator -->
+      <div class="mb-8">
+        <MonthNavigator v-model="transactionsStore.selectedMonth" />
       </div>
 
-      <!-- Stats Grid -->
-      <div class="px-4 py-6 sm:px-0">
-        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <!-- Stat Card 1 -->
-          <div class="group bg-white overflow-hidden shadow-xl rounded-2xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-transparent hover:border-blue-200">
-            <div class="p-6">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                    <ChartBarIcon class="h-7 w-7 text-white" />
-                  </div>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate mb-1">
-                      Total de Usuários
-                    </dt>
-                    <dd class="text-2xl font-bold text-gray-900">
-                      1
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-3">
-              <p class="text-xs text-blue-700 font-medium">↗ Sistema ativo</p>
-            </div>
-          </div>
-
-          <!-- Stat Card 2 -->
-          <div class="group bg-white overflow-hidden shadow-xl rounded-2xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-transparent hover:border-green-200">
-            <div class="p-6">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                    <DocumentTextIcon class="h-7 w-7 text-white" />
-                  </div>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate mb-1">
-                      Documentos
-                    </dt>
-                    <dd class="text-2xl font-bold text-gray-900">
-                      0
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gradient-to-r from-green-50 to-green-100 px-6 py-3">
-              <p class="text-xs text-green-700 font-medium">📄 Pronto para começar</p>
-            </div>
-          </div>
-
-          <!-- Stat Card 3 -->
-          <div class="group bg-white overflow-hidden shadow-xl rounded-2xl hover:shadow-2xl transition-all transform hover:-translate-y-1 border-2 border-transparent hover:border-purple-200">
-            <div class="p-6">
-              <div class="flex items-center">
-                <div class="flex-shrink-0">
-                  <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                    <CheckCircleIcon class="h-7 w-7 text-white" />
-                  </div>
-                </div>
-                <div class="ml-5 w-0 flex-1">
-                  <dl>
-                    <dt class="text-sm font-medium text-gray-500 truncate mb-1">
-                      Status
-                    </dt>
-                    <dd class="text-2xl font-bold text-gray-900">
-                      Ativo
-                    </dd>
-                  </dl>
-                </div>
-              </div>
-            </div>
-            <div class="bg-gradient-to-r from-purple-50 to-purple-100 px-6 py-3">
-              <p class="text-xs text-purple-700 font-medium">✓ Tudo funcionando</p>
-            </div>
-          </div>
-        </div>
+      <!-- Owner Filter + Settings -->
+      <div class="mb-8 flex items-center gap-3">
+        <OwnerFilter
+          v-model="transactionsStore.selectedOwner"
+          :partner1-name="coupleStore.partner1Name"
+          :partner2-name="coupleStore.partner2Name"
+          :user1-id="coupleStore.user1Id"
+          :user2-id="coupleStore.user2Id"
+          class="flex-1"
+        />
+        <button
+          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm transition-colors hover:text-slate-900 active:scale-95"
+          title="Configurações"
+          @click="router.push({ name: 'settings' })"
+        >
+          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.43.992a6.932 6.932 0 010 .255c-.008.378.137.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+        </button>
       </div>
 
-      <!-- Quick Actions -->
-      <div class="px-4 py-6 sm:px-0">
-        <div class="bg-white shadow-2xl rounded-2xl border border-gray-100">
-          <div class="px-6 py-6 border-b border-gray-100">
-            <h3 class="text-2xl font-bold text-gray-900 flex items-center">
-              <span class="mr-3">⚡</span>
-              Ações Rápidas
-            </h3>
-            <p class="text-gray-500 text-sm mt-1">Execute tarefas comuns rapidamente</p>
-          </div>
-          <div class="p-6">
-            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <button class="group relative flex items-center space-x-4 rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-blue-50 px-6 py-6 shadow-lg hover:shadow-xl hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all transform hover:-translate-y-1">
-                <div class="flex-shrink-0">
-                  <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                    <PlusCircleIcon class="h-6 w-6 text-white" />
-                  </div>
-                </div>
-                <div class="min-w-0 flex-1 text-left">
-                  <span class="text-base font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">Novo Item</span>
-                  <p class="text-xs text-gray-500 mt-1">Criar um novo registro</p>
-                </div>
-              </button>
+      <!-- Summary Cards -->
+      <section class="mb-10 flex flex-col gap-3">
+        <SummaryCard
+          label="Contas"
+          type="conta"
+          :value="totals.contas"
+          class="cursor-pointer"
+          @click="router.push({ name: 'accounts', query: { ...route.query, filter: 'conta' } })"
+        />
+        <SummaryCard
+          label="Cartões"
+          type="cartao"
+          :value="totals.cartoes"
+          class="cursor-pointer"
+          @click="router.push({ name: 'cards', query: route.query })"
+        />
+        <SummaryCard label="Receitas" type="income" :value="totals.receitas" />
+        <SummaryCard label="Despesas" type="expense" :value="totals.despesas" />
+      </section>
 
-              <button class="group relative flex items-center space-x-4 rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-purple-50 px-6 py-6 shadow-lg hover:shadow-xl hover:border-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all transform hover:-translate-y-1">
-                <div class="flex-shrink-0">
-                  <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                    <CogIcon class="h-6 w-6 text-white" />
-                  </div>
-                </div>
-                <div class="min-w-0 flex-1 text-left">
-                  <span class="text-base font-semibold text-gray-900 group-hover:text-purple-600 transition-colors">Configurações</span>
-                  <p class="text-xs text-gray-500 mt-1">Ajustar preferências</p>
-                </div>
-              </button>
-
-              <a
-                href="/"
-                class="group relative flex items-center space-x-4 rounded-xl border-2 border-gray-200 bg-gradient-to-br from-white to-green-50 px-6 py-6 shadow-lg hover:shadow-xl hover:border-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 transition-all transform hover:-translate-y-1"
-              >
-                <div class="flex-shrink-0">
-                  <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-md">
-                    <HomeIcon class="h-6 w-6 text-white" />
-                  </div>
-                </div>
-                <div class="min-w-0 flex-1 text-left">
-                  <span class="text-base font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Ir para Home</span>
-                  <p class="text-xs text-gray-500 mt-1">Voltar à página inicial</p>
-                </div>
-              </a>
-            </div>
-          </div>
+      <!-- Balance Section -->
+      <section class="mb-10 space-y-1 text-right">
+        <div>
+          <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Saldo do Mês</span>
+          <p class="text-lg font-bold" :class="totals.saldoMes >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+            {{ formatCurrency(totals.saldoMes) }}
+          </p>
         </div>
-      </div>
-
-      <!-- Info Section -->
-      <div class="px-4 py-6 sm:px-0">
-        <div class="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-l-4 border-blue-500 p-6 rounded-xl shadow-lg">
-          <div class="flex">
-            <div class="flex-shrink-0">
-              <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-lg flex items-center justify-center">
-                <InformationCircleIcon class="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <div class="ml-4 flex-1">
-              <h4 class="text-lg font-semibold text-gray-900 mb-2">💡 Sobre este Template</h4>
-              <p class="text-sm text-gray-700 leading-relaxed">
-                Este é um template completo de dashboard usando <strong class="text-blue-600">PocketBase</strong> + 
-                <strong class="text-green-600">Vue 3</strong> + 
-                <strong class="text-purple-600">TypeScript</strong> + 
-                <strong class="text-pink-600">Tailwind CSS</strong>.
-                Você pode personalizar este dashboard de acordo com suas necessidades e criar aplicações incríveis! 🚀
-              </p>
-            </div>
-          </div>
+        <div>
+          <span class="text-xs font-medium uppercase tracking-wide text-slate-400">Saldo Previsto</span>
+          <p class="text-sm font-semibold" :class="totals.saldoPrevisto >= 0 ? 'text-emerald-500' : 'text-rose-500'">
+            {{ formatCurrency(totals.saldoPrevisto) }}
+          </p>
         </div>
-      </div>
+      </section>
+
+      <!-- Transactions Section -->
+      <section>
+        <div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <h2 class="text-3xl font-bold text-slate-900">Lançamentos</h2>
+          <button 
+            class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-slate-800 active:scale-95"
+            @click="openCreateDrawer"
+          >
+            <span class="text-base">+</span>
+            <span>Novo Lançamento</span>
+          </button>
+        </div>
+
+        <TransactionTable
+          :rows="transactionsStore.monthTransactions"
+          :accounts="accountsStore.accounts"
+          :partner1-name="coupleStore.partner1Name"
+          :partner2-name="coupleStore.partner2Name"
+          :user1-id="coupleStore.user1Id"
+          :user2-id="coupleStore.user2Id"
+          @edit="openEditDrawer"
+          @remove="removeTransaction"
+        />
+      </section>
     </main>
+
+    <TransactionDrawer
+      :open="drawerOpen"
+      :model="editingTransaction"
+      :couple-id="coupleStore.id || ''"
+      :accounts="accountsStore.accounts"
+      :selected-month="transactionsStore.selectedMonth"
+      :partner1-name="coupleStore.partner1Name"
+      :partner2-name="coupleStore.partner2Name"
+      :user1-id="coupleStore.user1Id"
+      :user2-id="coupleStore.user2Id"
+      @close="closeDrawer"
+      @save="saveTransaction"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '../stores/auth'
-import {
-  UserCircleIcon,
-  ArrowRightOnRectangleIcon,
-  ChartBarIcon,
-  DocumentTextIcon,
-  CheckCircleIcon,
-  PlusCircleIcon,
-  CogIcon,
-  HomeIcon,
-  InformationCircleIcon,
-} from '@heroicons/vue/24/outline'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import type { RecordModel } from 'pocketbase'
+import MonthNavigator from '../components/MonthNavigator.vue'
+import OwnerFilter from '../components/OwnerFilter.vue'
+import SummaryCard from '../components/SummaryCard.vue'
+import TransactionTable from '../components/TransactionTable.vue'
+import TransactionDrawer from '../components/TransactionDrawer.vue'
+import { useCoupleStore } from '../stores/couple'
+import { useAccountsStore } from '../stores/accounts'
+import { useTransactionsStore } from '../stores/transactions'
+import { parseLocalDate } from '../utils/date'
 
+const route = useRoute()
 const router = useRouter()
-const authStore = useAuthStore()
+const coupleStore = useCoupleStore()
+const accountsStore = useAccountsStore()
+const transactionsStore = useTransactionsStore()
 
-const userName = computed(() => {
-  return authStore.user?.name || authStore.user?.email || 'Usuário'
+const drawerOpen = ref(false)
+const editingTransaction = ref<RecordModel | null>(null)
+
+const totals = computed(() => {
+  const accountMap = new Map(accountsStore.accounts.map((account) => [account.id, account]))
+  let contas = 0
+  let cartoes = 0
+  let receitas = 0
+  let despesas = 0
+  let receitasConsolidadas = 0
+  let despesasConsolidadas = 0
+  let receitasTodas = 0
+  let despesasTodas = 0
+
+  for (const tx of transactionsStore.byOwner) {
+    const type = tx.type as 'income' | 'expense'
+    const amount = Number(tx.amount || 0)
+    const account = accountMap.get(tx.account_id as string)
+    const isConta = account?.type === 'conta'
+    const isCartao = account?.type === 'cartao'
+
+    if (isConta && tx.consolidated) {
+      contas += type === 'income' ? amount : -amount
+    }
+
+    if (isCartao && tx.consolidated) {
+      const billingDateStr = (tx.monthly_budget || tx.date) as string
+      const billingDate = parseLocalDate(billingDateStr)
+      if (
+        billingDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
+        billingDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
+      ) {
+        cartoes += type === 'expense' ? -amount : amount
+      }
+    }
+
+    const refDateStr = isCartao
+      ? ((tx.monthly_budget || tx.date) as string)
+      : (tx.date as string)
+    const refDate = parseLocalDate(refDateStr)
+    const isCurrentMonth =
+      refDate.getMonth() === transactionsStore.selectedMonth.getMonth() &&
+      refDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
+
+    if (isCurrentMonth) {
+      if (!isCartao) {
+        if (type === 'income') receitas += amount
+        else despesas += amount
+
+        if (tx.consolidated) {
+          if (type === 'income') receitasConsolidadas += amount
+          else despesasConsolidadas += amount
+        }
+      }
+
+      if (type === 'income') receitasTodas += amount
+      else despesasTodas += amount
+    }
+  }
+
+  return {
+    contas,
+    cartoes,
+    receitas,
+    despesas,
+    saldoMes: receitasConsolidadas - despesasConsolidadas,
+    saldoPrevisto: receitasTodas - despesasTodas,
+  }
 })
 
-function handleLogout() {
-  authStore.logout()
-  router.push('/login')
+onMounted(async () => {
+  const token = typeof route.query.access_token === 'string' ? route.query.access_token : coupleStore.getStoredToken()
+  if (!token) return
+
+  const loaded = await coupleStore.loadByToken(token)
+  if (!loaded || !coupleStore.id) return
+
+  await Promise.all([
+    accountsStore.fetchAccounts(coupleStore.id),
+    transactionsStore.fetchTransactions(coupleStore.id),
+  ])
+})
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+}
+
+function openCreateDrawer() {
+  editingTransaction.value = null
+  drawerOpen.value = true
+}
+
+function openEditDrawer(model: RecordModel) {
+  editingTransaction.value = model
+  drawerOpen.value = true
+}
+
+function closeDrawer() {
+  drawerOpen.value = false
+  editingTransaction.value = null
+}
+
+async function saveTransaction(payload: { id?: string; data: any }) {
+  if (payload.id) {
+    await transactionsStore.updateTransaction(payload.id, payload.data)
+  } else {
+    await transactionsStore.createTransaction(payload.data)
+  }
+  closeDrawer()
+}
+
+async function removeTransaction(id: string) {
+  await transactionsStore.deleteTransaction(id)
 }
 </script>

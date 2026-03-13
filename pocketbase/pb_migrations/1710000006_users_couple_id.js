@@ -1,0 +1,43 @@
+migrate((txApp) => {
+  const couples = txApp.findCollectionByNameOrId('couples')
+  const users = txApp.findCollectionByNameOrId('users')
+
+  const emailField = users.fields.getByName('email')
+  if (emailField) {
+    emailField.required = false
+  }
+
+  users.fields.add(
+    new RelationField({
+      name: 'couple_id',
+      collectionId: couples.id,
+      maxSelect: 1,
+      cascadeDelete: true,
+    })
+  )
+
+  users.listRule = ''
+  users.viewRule = ''
+  users.createRule = ''
+  users.updateRule = ''
+  users.deleteRule = ''
+
+  txApp.save(users)
+}, (txApp) => {
+  const users = txApp.findCollectionByNameOrId('users')
+
+  const emailField = users.fields.getByName('email')
+  if (emailField) {
+    emailField.required = true
+  }
+
+  users.fields.removeByName('couple_id')
+
+  users.listRule = null
+  users.viewRule = null
+  users.createRule = null
+  users.updateRule = null
+  users.deleteRule = null
+
+  txApp.save(users)
+})
