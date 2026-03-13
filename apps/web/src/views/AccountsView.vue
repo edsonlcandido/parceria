@@ -64,6 +64,50 @@
             Editar conta
           </button>
           <button
+            v-if="!showBalanceUpdate"
+            class="flex w-full items-center gap-3 rounded-2xl border border-teal-100 bg-teal-50 px-4 py-4 text-sm font-semibold text-teal-700 active:scale-[0.98] transition-transform"
+            @click="openBalanceUpdate"
+          >
+            <svg class="h-5 w-5 text-teal-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+            </svg>
+            Atualizar saldo
+          </button>
+          <div v-if="showBalanceUpdate" class="rounded-2xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+            <div>
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Saldo atual</p>
+              <p class="text-lg font-bold mt-0.5" :class="currentActionsBalance >= 0 ? 'text-emerald-600' : 'text-rose-600'">
+                {{ Math.abs(currentActionsBalance).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) }}
+              </p>
+            </div>
+            <label class="block">
+              <span class="mb-1 block text-sm font-semibold text-slate-700">Novo saldo</span>
+              <input
+                v-model.number="newBalanceValue"
+                type="number"
+                step="0.01"
+                class="w-full rounded-xl border border-slate-300 px-3 py-3 focus:outline-none focus:ring-2 focus:ring-slate-400"
+                placeholder="0,00"
+              />
+            </label>
+            <div class="flex gap-2">
+              <button
+                type="button"
+                class="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700"
+                @click="showBalanceUpdate = false"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                class="flex-1 rounded-xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white hover:bg-slate-800"
+                @click="submitBalanceUpdate"
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+          <button
             class="flex w-full items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-4 text-sm font-semibold text-rose-600 active:scale-[0.98] transition-transform"
             @click="removeAccount(actionsAccount.id); actionsAccount = null"
           >
@@ -149,8 +193,45 @@ function ownerLabel(userId: string | null): string {
   return 'Outro'
 }
 
+const showBalanceUpdate = ref(false)
+const newBalanceValue = ref(0)
+
+const currentActionsBalance = computed(() => {
+  if (!actionsAccount.value) return 0
+  return balanceByAccount.value[actionsAccount.value.id] ?? 0
+})
+
 function openActions(model: RecordModel) {
   actionsAccount.value = model
+  showBalanceUpdate.value = false
+}
+
+function openBalanceUpdate() {
+  newBalanceValue.value = currentActionsBalance.value
+  showBalanceUpdate.value = true
+}
+
+async function submitBalanceUpdate() {
+  if (!actionsAccount.value || !coupleStore.id) return
+  const diff = newBalanceValue.value - currentActionsBalance.value
+  if (diff === 0) {
+    showBalanceUpdate.value = false
+    actionsAccount.value = null
+    return
+  }
+  const today = new Date().toISOString().split('T')[0]
+  await transactionsStore.createTransaction({
+    couple_id: coupleStore.id,
+    account_id: actionsAccount.value.id,
+    user_id: (actionsAccount.value.user_id as string) || null,
+    amount: Math.abs(diff),
+    description: 'Ajuste de saldo',
+    type: diff > 0 ? 'income' : 'expense',
+    date: today,
+    consolidated: true,
+  })
+  showBalanceUpdate.value = false
+  actionsAccount.value = null
 }
 
 function openCreate() {
