@@ -48,6 +48,7 @@ O produto deve permitir:
 - Filtrar visualização por todos do casal, Usuário 1 ou Usuário 2.
 - Exibir lista de lançamentos com rolagem horizontal em layout mobile.
 - Fazer CRUD de contas e lançamentos usando drawers.
+- Pagar fatura de cartão de crédito a partir de uma conta bancária.
 
 ## 6. Fora do Escopo no V1
 
@@ -86,6 +87,7 @@ O produto deve permitir:
 5. Informa saldo inicial opcional.
 6. Ao salvar, a conta é criada.
 7. Se houver saldo inicial, o sistema cria automaticamente um lançamento correspondente.
+8. Para contas do tipo cartão, o saldo inicial (fatura pré-existente) é registrado como despesa (expense).
 
 ### 8.3 Criação de lançamento
 
@@ -105,6 +107,19 @@ O produto deve permitir:
 1. Usuário alterna o mês no cabeçalho.
 2. Usuário filtra por todos do casal, Usuário 1 ou Usuário 2.
 3. O sistema recalcula cards e listagem com base no filtro selecionado.
+
+### 8.5 Pagamento de fatura de cartão
+
+1. Usuário acessa a ação "Pagar Fatura" a partir de um cartão.
+2. O sistema abre o drawer de pagamento de fatura.
+3. Usuário seleciona o cartão a pagar.
+4. Usuário seleciona a conta de origem (do tipo conta).
+5. Usuário informa o valor a pagar.
+6. Usuário informa a data do pagamento.
+7. Usuário informa descrição (opcional).
+8. Ao confirmar, o sistema cria um lançamento de despesa na conta de origem com a categoria `bill_payment`.
+9. Nenhum lançamento é criado no cartão. O saldo do cartão não é alterado pelo pagamento.
+10. O lançamento de pagamento de fatura não é incluído nos cálculos de Receitas e Despesas do dashboard.
 
 ## 9. Requisitos Funcionais
 
@@ -135,8 +150,27 @@ O produto deve permitir:
 - O sistema deve permitir marcar lançamento como consolidado ou não.
 - O sistema deve permitir informar descrição e data.
 - O sistema deve usar o saldo inicial da conta como lançamento criado automaticamente.
+- O sistema deve suportar a categoria `bill_payment` para lançamentos de pagamento de fatura de cartão.
 
-### 9.4 Dashboard
+### 9.4 Lançamentos em cartões de crédito
+
+- Compras no cartão devem ser registradas como despesas (expense).
+- Fatura inicial (saldo devedor pré-existente) deve ser registrada como despesa (expense).
+- Atualização de saldo (ajustes manuais) deve ser registrada como despesa ou receita, dependendo da diferença com o saldo atual:
+  - Se o ajuste aumenta a dívida → despesa (expense).
+  - Se o ajuste reduz a dívida → receita (income).
+
+### 9.5 Pagamento de fatura de cartão
+
+- O sistema deve oferecer a ação "Pagar Fatura" para contas do tipo cartão.
+- O sistema deve permitir selecionar uma conta de origem (do tipo conta) para o pagamento.
+- O sistema deve criar um lançamento de despesa na conta de origem ao confirmar o pagamento.
+- O sistema deve marcar o lançamento de pagamento com a categoria `bill_payment`.
+- O sistema NÃO deve criar nenhum lançamento no cartão ao pagar a fatura.
+- O saldo do cartão não deve ser alterado pelo pagamento da fatura.
+- Lançamentos com categoria `bill_payment` NÃO devem ser incluídos nos cálculos dos cards de Receitas e Despesas do dashboard.
+
+### 9.6 Dashboard
 
 - O sistema deve exibir cards de Contas, Cartões, Receitas e Despesas.
 - O sistema deve exibir o Saldo do Mês em destaque.
@@ -144,7 +178,7 @@ O produto deve permitir:
 - O sistema deve permitir filtrar por todos do casal, Usuário 1 e Usuário 2.
 - O sistema deve listar os lançamentos do período em tabela com rolagem horizontal.
 
-### 9.5 UI mobile-first
+### 9.7 UI mobile-first
 
 - O sistema deve ser otimizado para celular.
 - O sistema deve usar drawers para criar, editar e excluir contas e lançamentos.
@@ -152,14 +186,36 @@ O produto deve permitir:
 
 ## 10. Regras de Negócio
 
+### 10.1 Contas do tipo conta
+
 - O saldo de uma conta do tipo conta deve ser calculado por soma acumulada de receitas menos despesas.
+- O card Contas deve mostrar o saldo atual acumulado das contas do tipo conta.
+- Lançamentos com categoria `bill_payment` devem ser incluídos no cálculo do saldo da conta (pois representam saída real de dinheiro da conta bancária).
+
+### 10.2 Contas do tipo cartão
+
 - O saldo de um cartão deve ser calculado como saldo devedor acumulado.
 - O card Cartões deve mostrar o total devedor acumulado, não apenas o valor do mês.
-- O card Contas deve mostrar o saldo atual acumulado das contas do tipo conta.
+- O card Cartões deve sempre exibir valores positivos, pois representa dívidas/faturas a pagar.
+- Compras no cartão devem ser registradas como despesas (expense).
+- Fatura inicial (saldo devedor pré-existente) deve ser registrada como despesa (expense).
+- Atualização de saldo (ajustes) deve ser registrada como despesa (expense) se aumenta a dívida, ou receita (income) se reduz a dívida.
+
+### 10.3 Pagamento de fatura
+
+- O pagamento de fatura cria um lançamento de despesa apenas na conta de origem (conta bancária).
+- O pagamento de fatura NÃO gera nenhum lançamento no cartão. O saldo do cartão não é afetado.
+- O lançamento de pagamento de fatura deve ter a categoria `bill_payment`.
+- Lançamentos com categoria `bill_payment` NÃO devem ser contabilizados nos cards de Receitas e Despesas do dashboard.
+- Lançamentos com categoria `bill_payment` DEVEM ser contabilizados no saldo da conta de origem (impactam o card Contas).
+
+### 10.4 Regras gerais do dashboard
+
 - Receitas e Despesas devem considerar apenas o mês selecionado no dashboard.
 - O Saldo do Mês deve ser calculado por receitas do mês menos despesas do mês.
 - O filtro por responsável deve considerar três opções: todos do casal, Usuário 1 e Usuário 2.
 - O lançamento inicial gerado na criação da conta deve entrar nos cálculos normalmente.
+- Lançamentos com categoria `bill_payment` devem ser excluídos dos cálculos de Receitas, Despesas e Saldo do Mês.
 
 ## 11. Modelo de Dados Proposto
 
@@ -200,6 +256,7 @@ O produto deve permitir:
 - amount
 - description
 - type
+- category
 - date
 - consolidated
 - created
@@ -208,6 +265,13 @@ O produto deve permitir:
 Valores válidos:
 
 - type: income | expense
+- category: regular | bill_payment (default: regular)
+
+Observações:
+
+- O campo `category` diferencia lançamentos comuns (`regular`) de pagamentos de fatura de cartão (`bill_payment`).
+- Lançamentos com `category = bill_payment` são excluídos dos cards de Receitas, Despesas e Saldo do Mês.
+- Lançamentos com `category = bill_payment` são incluídos no cálculo do saldo da conta de origem.
 
 ## 12. Cálculos do Dashboard
 
@@ -219,6 +283,8 @@ Formula:
 
 - saldo_conta = soma(income) - soma(expense)
 
+Nota: Inclui todos os lançamentos da conta, inclusive os de categoria `bill_payment`.
+
 ### 12.2 Card Cartões
 
 Somatório do saldo devedor acumulado de todas as contas do tipo cartão, respeitando o filtro selecionado (todos do casal ou usuário específico).
@@ -229,21 +295,28 @@ Formula:
 
 Exibição esperada:
 
-- valor negativo ou visual de dívida
+- Sempre exibir como valor positivo (ex: R$ 500,00, não -R$ 500,00).
+- O valor representa o total de dívida acumulada no cartão.
 
 ### 12.3 Card Receitas
 
 Somatório das receitas do mês selecionado, respeitando o filtro selecionado (todos do casal ou usuário específico).
 
+Regra: Excluir lançamentos com `category = bill_payment`.
+
 ### 12.4 Card Despesas
 
 Somatório das despesas do mês selecionado, respeitando o filtro selecionado (todos do casal ou usuário específico).
+
+Regra: Excluir lançamentos com `category = bill_payment`.
 
 ### 12.5 Saldo do Mês
 
 Formula:
 
 - saldo_mes = receitas_mes - despesas_mes
+
+Regra: Excluir lançamentos com `category = bill_payment` de ambos os lados da fórmula.
 
 ## 13. Estrutura de Telas
 
@@ -289,6 +362,23 @@ Campos mínimos:
 - Data
 - Consolidado
 
+### 13.4 Drawer de pagamento de fatura
+
+Campos mínimos:
+
+- Cartão a pagar
+- Conta de origem (do tipo conta)
+- Valor a pagar
+- Data do pagamento
+- Descrição (opcional)
+
+Comportamento:
+
+- Disponível como ação nas contas do tipo cartão.
+- Ao confirmar, cria lançamento de despesa na conta de origem com `category = bill_payment`.
+- Não cria nenhum lançamento no cartão.
+- O saldo do cartão permanece inalterado.
+
 ## 14. Requisitos Não Funcionais
 
 - A aplicação deve funcionar bem em telas pequenas.
@@ -319,8 +409,15 @@ Campos mínimos:
 - Deve ser possível criar conta do tipo conta e cartão.
 - Deve ser possível vincular conta por `user_id`.
 - O saldo inicial da conta deve ser persistido como lançamento.
+- Para cartões, o saldo inicial deve ser registrado como despesa (expense).
 - Deve ser possível criar, editar e excluir lançamentos.
 - O dashboard deve exibir os totais corretos por mês.
 - O dashboard deve responder corretamente ao filtro por todos do casal, Usuário 1 e Usuário 2.
-- O card Cartões deve mostrar o saldo devedor acumulado.
+- O card Cartões deve mostrar o saldo devedor acumulado sempre como valor positivo.
+- Compras no cartão devem ser registradas como despesas.
+- Ajustes de saldo em cartões devem ser despesa ou receita conforme a direção do ajuste.
+- Deve ser possível pagar fatura de cartão a partir de uma conta bancária.
+- O pagamento de fatura deve criar lançamento de despesa apenas na conta de origem, sem afetar o cartão.
+- Lançamentos de pagamento de fatura (`bill_payment`) não devem aparecer nos cards de Receitas e Despesas.
+- Lançamentos de pagamento de fatura devem impactar o saldo da conta de origem (card Contas).
 - Todas as operações principais devem ser utilizáveis em interface mobile com drawers.
