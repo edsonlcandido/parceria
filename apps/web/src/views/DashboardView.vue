@@ -87,6 +87,7 @@
           :user2-id="coupleStore.user2Id"
           @edit="openEditDrawer"
           @remove="removeTransaction"
+          @consolidate="consolidateTransaction"
         />
       </section>
     </main>
@@ -257,5 +258,9 @@ async function saveTransaction(payload: { id?: string; data: any }) {
 
 async function removeTransaction(id: string) {
   await transactionsStore.deleteTransaction(id)
+}
+
+async function consolidateTransaction(id: string, date: string) {
+  await transactionsStore.updateTransaction(id, { consolidated: true, date })
 }
 </script>

@@ -84,6 +84,17 @@
         </button>
 
         <button
+          v-if="!actionsItem.consolidated"
+          class="flex w-full items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm font-semibold text-emerald-700 active:scale-[0.98] transition-transform"
+          @click="consolidate(actionsItem!)"
+        >
+          <svg class="h-5 w-5 text-emerald-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Consolidar lançamento
+        </button>
+
+        <button
           class="flex w-full items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-4 text-sm font-semibold text-rose-600 active:scale-[0.98] transition-transform"
           @click="confirmRemove(actionsItem!)"
         >
@@ -113,6 +124,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'edit', value: RecordModel): void
   (e: 'remove', id: string): void
+  (e: 'consolidate', id: string, date: string): void
 }>()
 
 const actionsItem = ref<RecordModel | null>(null)
@@ -139,6 +151,12 @@ function formatDate(dateValue: string) {
 function confirmRemove(item: RecordModel) {
   if (!confirm('Excluir este lançamento?')) return
   emit('remove', item.id)
+  actionsItem.value = null
+}
+
+function consolidate(item: RecordModel) {
+  const date = (item.date as string) || new Date().toISOString().split('T')[0]
+  emit('consolidate', item.id, date)
   actionsItem.value = null
 }
 </script>
