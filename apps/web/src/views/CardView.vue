@@ -105,6 +105,16 @@
             </div>
           </div>
           <button
+            v-if="cardTotal(actionsAccount.id) < 0"
+            class="flex w-full items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm font-semibold text-emerald-700 active:scale-[0.98] transition-transform"
+            @click="openPayBill"
+          >
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Pagar Fatura ({{ formatCurrency(Math.abs(cardTotal(actionsAccount.id))) }})
+          </button>
+          <button
             class="flex w-full items-center gap-3 rounded-2xl border border-rose-100 bg-rose-50 px-4 py-4 text-sm font-semibold text-rose-600 active:scale-[0.98] transition-transform"
             @click="removeAccount(actionsAccount.id); actionsAccount = null"
           >
@@ -112,6 +122,48 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
             Excluir cartão
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Pagar Fatura -->
+    <div v-if="showPayBill && actionsAccount" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60" @click.self="showPayBill = false">
+      <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl mx-4">
+        <h3 class="mb-4 text-xl font-bold text-slate-900">Pagar Fatura</h3>
+
+        <div class="mb-4">
+          <p class="text-sm text-slate-600 mb-2">Cartão:</p>
+          <p class="text-lg font-semibold text-slate-900">{{ actionsAccount.name }}</p>
+        </div>
+
+        <div class="mb-4">
+          <p class="text-sm text-slate-600 mb-2">Valor a pagar (mês atual):</p>
+          <p class="text-2xl font-bold text-rose-600">{{ formatCurrency(Math.abs(cardTotal(actionsAccount.id))) }}</p>
+        </div>
+
+        <label class="block mb-6">
+          <span class="mb-2 block text-sm font-semibold text-slate-700">Pagar com a conta:</span>
+          <select v-model="selectedPaymentAccount" class="w-full rounded-xl border border-slate-300 px-3 py-3">
+            <option v-for="account in contaAccounts" :key="account.id" :value="account.id">
+              {{ account.name }} - {{ ownerLabel(account.user_id as string | null) }}
+            </option>
+          </select>
+        </label>
+
+        <div class="flex gap-3">
+          <button
+            class="flex-1 rounded-xl border-2 border-slate-300 px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50"
+            @click="showPayBill = false"
+          >
+            Cancelar
+          </button>
+          <button
+            class="flex-1 rounded-xl bg-emerald-600 px-4 py-3 font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+            :disabled="!selectedPaymentAccount"
+            @click="confirmPayBill"
+          >
+            Confirmar Pagamento
           </button>
         </div>
       </div>
@@ -144,6 +196,10 @@ import { useAccountsStore } from '../stores/accounts'
 import { useTransactionsStore } from '../stores/transactions'
 import type { AccountPayload } from '../stores/accounts'
 import { parseLocalDate } from '../utils/date'
+
+function formatCurrency(value: number) {
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+}
 
 const route = useRoute()
 const coupleStore = useCoupleStore()
@@ -201,6 +257,13 @@ function ownerLabel(userId: string | null): string {
 const showBalanceUpdate = ref(false)
 const newBalanceValue = ref(0)
 
+const showPayBill = ref(false)
+const selectedPaymentAccount = ref<string | null>(null)
+
+const contaAccounts = computed(() =>
+  accountsStore.accounts.filter((a) => a.type === 'conta')
+)
+
 const currentActionsBalance = computed(() => {
   if (!actionsAccount.value) return 0
   return cardTotal(actionsAccount.value.id)
@@ -214,6 +277,35 @@ function openActions(model: RecordModel) {
 function openBalanceUpdate() {
   newBalanceValue.value = currentActionsBalance.value
   showBalanceUpdate.value = true
+}
+
+function openPayBill() {
+  selectedPaymentAccount.value = contaAccounts.value[0]?.id || null
+  showPayBill.value = true
+}
+
+async function confirmPayBill() {
+  if (!actionsAccount.value || !selectedPaymentAccount.value || !coupleStore.id) return
+
+  const balance = cardTotal(actionsAccount.value.id)
+  if (balance >= 0) return
+
+  const today = new Date().toISOString().split('T')[0]
+
+  await transactionsStore.createTransaction({
+    couple_id: coupleStore.id,
+    account_id: selectedPaymentAccount.value,
+    user_id: (actionsAccount.value.user_id as string) || null,
+    amount: Math.abs(balance),
+    description: `Pagamento fatura ${actionsAccount.value.name}`,
+    type: 'expense',
+    category: 'bill_payment',
+    date: today,
+    consolidated: true,
+  })
+
+  showPayBill.value = false
+  actionsAccount.value = null
 }
 
 async function submitBalanceUpdate() {
