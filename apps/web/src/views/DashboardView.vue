@@ -66,8 +66,20 @@
           </button>
         </div>
 
+        <div class="mb-4 relative">
+          <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="Buscar por descrição ou valor..."
+            class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          />
+        </div>
+
         <TransactionTable
-          :rows="transactionsStore.monthTransactions"
+          :rows="filteredTransactions"
           :accounts="accountsStore.accounts"
           :partner1-name="coupleStore.partner1Name"
           :partner2-name="coupleStore.partner2Name"
@@ -117,6 +129,19 @@ const transactionsStore = useTransactionsStore()
 
 const drawerOpen = ref(false)
 const editingTransaction = ref<RecordModel | null>(null)
+const searchQuery = ref('')
+
+const filteredTransactions = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return transactionsStore.monthTransactions
+  return transactionsStore.monthTransactions.filter((tx) => {
+    const description = ((tx.description as string) || '').toLowerCase()
+    const amount = Number(tx.amount || 0)
+    const amountFormatted = formatCurrency(amount).toLowerCase()
+    const amountStr = String(amount).replace('.', ',')
+    return description.includes(q) || amountFormatted.includes(q) || amountStr.includes(q)
+  })
+})
 
 const totals = computed(() => {
   const accountMap = new Map(accountsStore.accounts.map((account) => [account.id, account]))
