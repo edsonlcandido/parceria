@@ -171,7 +171,9 @@ const totals = computed(() => {
       refDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
 
     if (isCurrentMonth) {
-      if (!isCartao) {
+      const isBillPayment = !isCartao && (tx.category as string) === 'bill_payment'
+
+      if (!isCartao && !isBillPayment) {
         if (type === 'income') receitas += amount
         else despesas += amount
 
@@ -181,8 +183,10 @@ const totals = computed(() => {
         }
       }
 
-      if (type === 'income') receitasTodas += amount
-      else despesasTodas += amount
+      if (!isBillPayment) {
+        if (type === 'income') receitasTodas += amount
+        else despesasTodas += amount
+      }
     }
   }
 

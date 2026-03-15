@@ -11,6 +11,7 @@ export interface TransactionPayload {
   amount: number
   description?: string
   type: 'income' | 'expense'
+  category?: 'regular' | 'bill_payment'
   date: string
   consolidated: boolean
   monthly_budget?: string | null
