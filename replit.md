@@ -49,6 +49,7 @@ Builds both frontends and copies them to `pocketbase/pb_public/`. PocketBase the
 - **users** (auth): id, name, couple_id (relation → couples, cascade delete), email (optional)
 - **accounts**: id, couple_id (relation → couples), user_id (relation → users, nullable), name, type (conta|cartao)
 - **transactions**: id, couple_id (relation → couples), account_id (relation → accounts), user_id (relation → users, nullable), amount, description, type (income|expense), date, consolidated
+- **recurring_transactions**: id, couple_id (relation → couples, cascade delete), user_id (relation → users, nullable), description, amount, type (income|expense), day (number 1-31, dia do mês)
 
 V1: No login. Access via URL with secret token. user_id=null means "Casal" (shared). All collection rules are open ('').
 
