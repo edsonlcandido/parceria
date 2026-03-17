@@ -6,26 +6,15 @@
         <MonthNavigator v-model="transactionsStore.selectedMonth" />
       </div>
 
-      <!-- Owner Filter + Settings -->
-      <div class="mb-8 flex items-center gap-3">
+      <!-- Owner Filter -->
+      <div class="mb-8">
         <OwnerFilter
           v-model="transactionsStore.selectedOwner"
           :partner1-name="coupleStore.partner1Name"
           :partner2-name="coupleStore.partner2Name"
           :user1-id="coupleStore.user1Id"
           :user2-id="coupleStore.user2Id"
-          class="flex-1"
         />
-        <button
-          class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-slate-500 shadow-sm transition-colors hover:text-slate-900 active:scale-95"
-          title="Configurações"
-          @click="router.push({ name: 'settings' })"
-        >
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.43.992a6.932 6.932 0 010 .255c-.008.378.137.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </button>
       </div>
 
       <!-- Summary Cards -->
@@ -68,17 +57,50 @@
       <section>
         <div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <h2 class="text-3xl font-bold text-slate-900">Lançamentos</h2>
-          <button 
-            class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-slate-800 active:scale-95"
-            @click="openCreateDrawer"
-          >
-            <span class="text-base">+</span>
-            <span>Novo Lançamento</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+              :disabled="applyingRecurring"
+              @click="applyRecurring"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              <span>{{ applyingRecurring ? 'Aplicando...' : 'Aplicar Fixos' }}</span>
+            </button>
+            <button 
+              class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-slate-800 active:scale-95"
+              @click="openCreateDrawer"
+            >
+              <span class="text-base">+</span>
+              <span>Novo Lançamento</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feedback de aplicação de fixos -->
+        <div
+          v-if="applyFeedback"
+          class="mb-4 rounded-2xl px-4 py-3 text-sm font-medium"
+          :class="applyFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'"
+        >
+          {{ applyFeedback.message }}
+        </div>
+
+        <div class="mb-4 relative">
+          <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+          </svg>
+          <input
+            v-model="searchQuery"
+            type="search"
+            placeholder="Buscar por descrição ou valor..."
+            class="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-4 text-sm text-slate-900 shadow-sm placeholder:text-slate-400 focus:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-200"
+          />
         </div>
 
         <TransactionTable
-          :rows="transactionsStore.monthTransactions"
+          :rows="filteredTransactions"
           :accounts="accountsStore.accounts"
           :partner1-name="coupleStore.partner1Name"
           :partner2-name="coupleStore.partner2Name"
@@ -86,6 +108,7 @@
           :user2-id="coupleStore.user2Id"
           @edit="openEditDrawer"
           @remove="removeTransaction"
+          @consolidate="consolidateTransaction"
         />
       </section>
     </main>
@@ -118,16 +141,33 @@ import TransactionDrawer from '../components/TransactionDrawer.vue'
 import { useCoupleStore } from '../stores/couple'
 import { useAccountsStore } from '../stores/accounts'
 import { useTransactionsStore } from '../stores/transactions'
-import { parseLocalDate } from '../utils/date'
+import { useRecurringTransactionsStore } from '../stores/recurringTransactions'
+import { parseLocalDate, isSameMonth } from '../utils/date'
 
 const route = useRoute()
 const router = useRouter()
 const coupleStore = useCoupleStore()
 const accountsStore = useAccountsStore()
 const transactionsStore = useTransactionsStore()
+const recurringStore = useRecurringTransactionsStore()
 
 const drawerOpen = ref(false)
 const editingTransaction = ref<RecordModel | null>(null)
+const searchQuery = ref('')
+const applyingRecurring = ref(false)
+const applyFeedback = ref<{ type: 'success' | 'info'; message: string } | null>(null)
+
+const filteredTransactions = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return transactionsStore.monthTransactions
+  return transactionsStore.monthTransactions.filter((tx) => {
+    const description = ((tx.description as string) || '').toLowerCase()
+    const amount = Number(tx.amount || 0)
+    const amountFormatted = formatCurrency(amount).toLowerCase()
+    const amountStr = String(amount).replace('.', ',')
+    return description.includes(q) || amountFormatted.includes(q) || amountStr.includes(q)
+  })
+})
 
 const totals = computed(() => {
   const accountMap = new Map(accountsStore.accounts.map((account) => [account.id, account]))
@@ -171,7 +211,9 @@ const totals = computed(() => {
       refDate.getFullYear() === transactionsStore.selectedMonth.getFullYear()
 
     if (isCurrentMonth) {
-      if (!isCartao) {
+      const isBillPayment = !isCartao && (tx.category as string) === 'bill_payment'
+
+      if (!isCartao && !isBillPayment) {
         if (type === 'income') receitas += amount
         else despesas += amount
 
@@ -181,8 +223,10 @@ const totals = computed(() => {
         }
       }
 
-      if (type === 'income') receitasTodas += amount
-      else despesasTodas += amount
+      if (!isBillPayment) {
+        if (type === 'income') receitasTodas += amount
+        else despesasTodas += amount
+      }
     }
   }
 
@@ -206,11 +250,84 @@ onMounted(async () => {
   await Promise.all([
     accountsStore.fetchAccounts(coupleStore.id),
     transactionsStore.fetchTransactions(coupleStore.id),
+    recurringStore.fetchAll(coupleStore.id),
   ])
 })
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+}
+
+function buildTargetDate(day: number, base: Date): string {
+  const year = base.getFullYear()
+  const month = base.getMonth()
+  const lastDay = new Date(year, month + 1, 0).getDate()
+  const clampedDay = Math.min(day, lastDay)
+  const m = String(month + 1).padStart(2, '0')
+  const d = String(clampedDay).padStart(2, '0')
+  return `${year}-${m}-${d}`
+}
+
+function firstDayOfMonthBudget(base: Date): string {
+  const year = base.getFullYear()
+  const m = String(base.getMonth() + 1).padStart(2, '0')
+  return `${year}-${m}-01T17:00:00.000Z`
+}
+
+async function applyRecurring() {
+  if (!coupleStore.id) return
+
+  const fixos = recurringStore.sortedByDay
+  if (fixos.length === 0) {
+    applyFeedback.value = { type: 'info', message: 'Nenhum lançamento fixo cadastrado.' }
+    setTimeout(() => (applyFeedback.value = null), 4000)
+    return
+  }
+
+  applyingRecurring.value = true
+  applyFeedback.value = null
+
+  const selectedMonth = transactionsStore.selectedMonth
+  let added = 0
+  let skipped = 0
+
+  for (const fixo of fixos) {
+    const desc = (fixo.description as string) || ''
+    const alreadyExists = transactionsStore.transactions.some((tx) => {
+      const refDate = ((tx.monthly_budget || tx.date) as string) || ''
+      return (tx.description as string) === desc && isSameMonth(refDate, selectedMonth)
+    })
+
+    if (alreadyExists) {
+      skipped++
+      continue
+    }
+
+    const targetDate = buildTargetDate(fixo.day as number, selectedMonth)
+    await transactionsStore.createTransaction({
+      couple_id: coupleStore.id,
+      account_id: null,
+      user_id: (fixo.user_id as string) || null,
+      type: fixo.type as 'income' | 'expense',
+      amount: fixo.amount as number,
+      description: desc,
+      date: new Date(targetDate + 'T12:00:00').toISOString(),
+      consolidated: false,
+      monthly_budget: firstDayOfMonthBudget(selectedMonth),
+    })
+    added++
+  }
+
+  applyingRecurring.value = false
+
+  const parts: string[] = []
+  if (added > 0) parts.push(`${added} ${added === 1 ? 'fixo adicionado' : 'fixos adicionados'}`)
+  if (skipped > 0) parts.push(`${skipped} já ${skipped === 1 ? 'existia' : 'existiam'}`)
+  applyFeedback.value = {
+    type: added > 0 ? 'success' : 'info',
+    message: parts.join(', ') + '.',
+  }
+  setTimeout(() => (applyFeedback.value = null), 5000)
 }
 
 function openCreateDrawer() {
@@ -239,5 +356,9 @@ async function saveTransaction(payload: { id?: string; data: any }) {
 
 async function removeTransaction(id: string) {
   await transactionsStore.deleteTransaction(id)
+}
+
+async function consolidateTransaction(id: string, date: string) {
+  await transactionsStore.updateTransaction(id, { consolidated: true, date })
 }
 </script>
