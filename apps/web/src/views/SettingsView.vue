@@ -4,14 +4,7 @@
 
       <!-- Header -->
       <div class="mb-6 flex items-center gap-3">
-        <button
-          class="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-slate-600 shadow-sm active:scale-95"
-          @click="router.back()"
-        >
-          <svg class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
+ 
         <h1 class="text-2xl font-bold text-slate-900">Configurações</h1>
       </div>
 
