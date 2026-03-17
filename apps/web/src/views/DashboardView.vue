@@ -33,8 +33,22 @@
           class="cursor-pointer"
           @click="router.push({ name: 'cards', query: route.query })"
         />
-        <SummaryCard label="Receitas" type="income" :value="totals.receitas" />
-        <SummaryCard label="Despesas" type="expense" :value="totals.despesas" />
+        <SummaryCard
+          label="Receitas"
+          type="income"
+          :value="totals.receitas"
+          class="cursor-pointer transition-all"
+          :class="typeFilter === 'income' ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-emerald-600 scale-[1.02]' : ''"
+          @click="typeFilter = typeFilter === 'income' ? null : 'income'"
+        />
+        <SummaryCard
+          label="Despesas"
+          type="expense"
+          :value="totals.despesas"
+          class="cursor-pointer transition-all"
+          :class="typeFilter === 'expense' ? 'ring-2 ring-white/60 ring-offset-2 ring-offset-rose-600 scale-[1.02]' : ''"
+          @click="typeFilter = typeFilter === 'expense' ? null : 'expense'"
+        />
       </section>
 
       <!-- Balance Section -->
@@ -99,6 +113,27 @@
           />
         </div>
 
+        <div v-if="typeFilter" class="mb-4 flex items-center gap-2">
+          <span
+            class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold"
+            :class="typeFilter === 'income' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z"/>
+            </svg>
+            Filtrando: {{ typeFilter === 'income' ? 'Receitas' : 'Despesas' }}
+          </span>
+          <button
+            class="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-700"
+            @click="typeFilter = null"
+          >
+            <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+            Limpar filtro
+          </button>
+        </div>
+
         <TransactionTable
           :rows="filteredTransactions"
           :accounts="accountsStore.accounts"
@@ -130,7 +165,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import type { RecordModel } from 'pocketbase'
 import MonthNavigator from '../components/MonthNavigator.vue'
@@ -156,11 +191,24 @@ const editingTransaction = ref<RecordModel | null>(null)
 const searchQuery = ref('')
 const applyingRecurring = ref(false)
 const applyFeedback = ref<{ type: 'success' | 'info'; message: string } | null>(null)
+const typeFilter = ref<'income' | 'expense' | null>(null)
+
+watch(
+  [() => transactionsStore.selectedMonth, () => transactionsStore.selectedOwner],
+  () => { typeFilter.value = null }
+)
 
 const filteredTransactions = computed(() => {
+  let list = transactionsStore.monthTransactions
+
+  if (typeFilter.value) {
+    list = list.filter((tx) => tx.type === typeFilter.value)
+  }
+
   const q = searchQuery.value.trim().toLowerCase()
-  if (!q) return transactionsStore.monthTransactions
-  return transactionsStore.monthTransactions.filter((tx) => {
+  if (!q) return list
+
+  return list.filter((tx) => {
     const description = ((tx.description as string) || '').toLowerCase()
     const amount = Number(tx.amount || 0)
     const amountFormatted = formatCurrency(amount).toLowerCase()
