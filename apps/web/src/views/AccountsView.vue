@@ -130,7 +130,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import type { RecordModel } from 'pocketbase'
 import AccountDrawer from '../components/AccountDrawer.vue'
 import AccountCard from '../components/AccountCard.vue'
@@ -139,7 +139,6 @@ import { useTransactionsStore } from '../stores/transactions'
 import { useCoupleStore } from '../stores/couple'
 
 const route = useRoute()
-const router = useRouter()
 const coupleStore = useCoupleStore()
 const accountsStore = useAccountsStore()
 const transactionsStore = useTransactionsStore()

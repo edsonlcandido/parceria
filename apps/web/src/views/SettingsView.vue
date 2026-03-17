@@ -216,14 +216,12 @@
 
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
 import { useCoupleStore } from '../stores/couple'
 import { useRecurringTransactionsStore } from '../stores/recurringTransactions'
 import type { RecurringTransactionPayload } from '../stores/recurringTransactions'
 import type { RecordModel } from 'pocketbase'
 import RecurringDrawer from '../components/RecurringDrawer.vue'
 
-const router = useRouter()
 const coupleStore = useCoupleStore()
 const recurringStore = useRecurringTransactionsStore()
 
