@@ -222,7 +222,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCoupleStore } from '../stores/couple'
 import { useRecurringTransactionsStore } from '../stores/recurringTransactions'
@@ -306,9 +306,11 @@ async function deleteRecurring(id: string) {
   await recurringStore.remove(id)
 }
 
-onMounted(() => {
-  if (coupleStore.id) {
-    recurringStore.fetchAll(coupleStore.id)
-  }
-})
+watch(
+  () => coupleStore.id,
+  (newId) => {
+    if (newId) recurringStore.fetchAll(newId)
+  },
+  { immediate: true }
+)
 </script>
