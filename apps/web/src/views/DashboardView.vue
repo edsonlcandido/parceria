@@ -57,13 +57,34 @@
       <section>
         <div class="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
           <h2 class="text-3xl font-bold text-slate-900">Lançamentos</h2>
-          <button 
-            class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-slate-800 active:scale-95"
-            @click="openCreateDrawer"
-          >
-            <span class="text-base">+</span>
-            <span>Novo Lançamento</span>
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              class="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition-all duration-200 hover:bg-slate-50 active:scale-95 disabled:opacity-50"
+              :disabled="applyingRecurring"
+              @click="applyRecurring"
+            >
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+              </svg>
+              <span>{{ applyingRecurring ? 'Aplicando...' : 'Aplicar Fixos' }}</span>
+            </button>
+            <button 
+              class="inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:bg-slate-800 active:scale-95"
+              @click="openCreateDrawer"
+            >
+              <span class="text-base">+</span>
+              <span>Novo Lançamento</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Feedback de aplicação de fixos -->
+        <div
+          v-if="applyFeedback"
+          class="mb-4 rounded-2xl px-4 py-3 text-sm font-medium"
+          :class="applyFeedback.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'"
+        >
+          {{ applyFeedback.message }}
         </div>
 
         <div class="mb-4 relative">
@@ -120,17 +141,21 @@ import TransactionDrawer from '../components/TransactionDrawer.vue'
 import { useCoupleStore } from '../stores/couple'
 import { useAccountsStore } from '../stores/accounts'
 import { useTransactionsStore } from '../stores/transactions'
-import { parseLocalDate } from '../utils/date'
+import { useRecurringTransactionsStore } from '../stores/recurringTransactions'
+import { parseLocalDate, isSameMonth } from '../utils/date'
 
 const route = useRoute()
 const router = useRouter()
 const coupleStore = useCoupleStore()
 const accountsStore = useAccountsStore()
 const transactionsStore = useTransactionsStore()
+const recurringStore = useRecurringTransactionsStore()
 
 const drawerOpen = ref(false)
 const editingTransaction = ref<RecordModel | null>(null)
 const searchQuery = ref('')
+const applyingRecurring = ref(false)
+const applyFeedback = ref<{ type: 'success' | 'info'; message: string } | null>(null)
 
 const filteredTransactions = computed(() => {
   const q = searchQuery.value.trim().toLowerCase()
@@ -225,11 +250,84 @@ onMounted(async () => {
   await Promise.all([
     accountsStore.fetchAccounts(coupleStore.id),
     transactionsStore.fetchTransactions(coupleStore.id),
+    recurringStore.fetchAll(coupleStore.id),
   ])
 })
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
+}
+
+function buildTargetDate(day: number, base: Date): string {
+  const year = base.getFullYear()
+  const month = base.getMonth()
+  const lastDay = new Date(year, month + 1, 0).getDate()
+  const clampedDay = Math.min(day, lastDay)
+  const m = String(month + 1).padStart(2, '0')
+  const d = String(clampedDay).padStart(2, '0')
+  return `${year}-${m}-${d}`
+}
+
+function firstDayOfMonthBudget(base: Date): string {
+  const year = base.getFullYear()
+  const m = String(base.getMonth() + 1).padStart(2, '0')
+  return `${year}-${m}-01T17:00:00.000Z`
+}
+
+async function applyRecurring() {
+  if (!coupleStore.id) return
+
+  const fixos = recurringStore.sortedByDay
+  if (fixos.length === 0) {
+    applyFeedback.value = { type: 'info', message: 'Nenhum lançamento fixo cadastrado.' }
+    setTimeout(() => (applyFeedback.value = null), 4000)
+    return
+  }
+
+  applyingRecurring.value = true
+  applyFeedback.value = null
+
+  const selectedMonth = transactionsStore.selectedMonth
+  let added = 0
+  let skipped = 0
+
+  for (const fixo of fixos) {
+    const desc = (fixo.description as string) || ''
+    const alreadyExists = transactionsStore.transactions.some((tx) => {
+      const refDate = ((tx.monthly_budget || tx.date) as string) || ''
+      return (tx.description as string) === desc && isSameMonth(refDate, selectedMonth)
+    })
+
+    if (alreadyExists) {
+      skipped++
+      continue
+    }
+
+    const targetDate = buildTargetDate(fixo.day as number, selectedMonth)
+    await transactionsStore.createTransaction({
+      couple_id: coupleStore.id,
+      account_id: null,
+      user_id: (fixo.user_id as string) || null,
+      type: fixo.type as 'income' | 'expense',
+      amount: fixo.amount as number,
+      description: desc,
+      date: new Date(targetDate + 'T12:00:00').toISOString(),
+      consolidated: false,
+      monthly_budget: firstDayOfMonthBudget(selectedMonth),
+    })
+    added++
+  }
+
+  applyingRecurring.value = false
+
+  const parts: string[] = []
+  if (added > 0) parts.push(`${added} ${added === 1 ? 'fixo adicionado' : 'fixos adicionados'}`)
+  if (skipped > 0) parts.push(`${skipped} já ${skipped === 1 ? 'existia' : 'existiam'}`)
+  applyFeedback.value = {
+    type: added > 0 ? 'success' : 'info',
+    message: parts.join(', ') + '.',
+  }
+  setTimeout(() => (applyFeedback.value = null), 5000)
 }
 
 function openCreateDrawer() {
