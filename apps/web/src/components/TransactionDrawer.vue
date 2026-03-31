@@ -199,7 +199,7 @@ function submitForm() {
     type: form.value.type,
     amount: Number(form.value.amount),
     description: form.value.description,
-    date: new Date(form.value.date).toISOString(),
+    date: new Date(form.value.date + 'T12:00:00').toISOString(),
     consolidated: !planned.value,
     monthly_budget: form.value.monthly_budget
       ? `${form.value.monthly_budget}T17:00:00.000Z`
