@@ -201,6 +201,13 @@ function formatCurrency(value: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 }
 
+function localNoonISO(date: Date = new Date()): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return new Date(`${y}-${m}-${d}T12:00:00`).toISOString()
+}
+
 const route = useRoute()
 const coupleStore = useCoupleStore()
 const accountsStore = useAccountsStore()
@@ -290,8 +297,6 @@ async function confirmPayBill() {
   const balance = cardTotal(actionsAccount.value.id)
   if (balance >= 0) return
 
-  const today = new Date().toISOString().split('T')[0]
-
   await transactionsStore.createTransaction({
     couple_id: coupleStore.id,
     account_id: selectedPaymentAccount.value,
@@ -300,7 +305,7 @@ async function confirmPayBill() {
     description: `Pagamento fatura ${actionsAccount.value.name}`,
     type: 'expense',
     category: 'bill_payment',
-    date: today,
+    date: localNoonISO(),
     consolidated: true,
   })
 
@@ -316,7 +321,8 @@ async function submitBalanceUpdate() {
     actionsAccount.value = null
     return
   }
-  const today = new Date().toISOString().split('T')[0]
+  const selectedMonth = transactionsStore.selectedMonth
+  const monthFirstDay = `${selectedMonth.getFullYear()}-${String(selectedMonth.getMonth() + 1).padStart(2, '0')}-01`
   await transactionsStore.createTransaction({
     couple_id: coupleStore.id,
     account_id: actionsAccount.value.id,
@@ -324,8 +330,9 @@ async function submitBalanceUpdate() {
     amount: Math.abs(diff),
     description: 'Ajuste de saldo',
     type: diff > 0 ? 'income' : 'expense',
-    date: today,
+    date: localNoonISO(),
     consolidated: true,
+    monthly_budget: new Date(monthFirstDay + 'T12:00:00').toISOString(),
   })
   showBalanceUpdate.value = false
   actionsAccount.value = null
